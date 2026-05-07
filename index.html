@@ -131,9 +131,9 @@ tbody tr:hover td { background:rgba(255,255,255,.025); }
 .rst b { color:var(--t2); font-weight:600; }
 
 /* Gap rows */
-.grow { display:grid; grid-template-columns:1fr 50px 68px 84px; gap:10px; align-items:center; padding:13px 20px; border-bottom:1px solid var(--bd); transition:background .1s; }
+.grow { display:grid; grid-template-columns:1fr 50px 68px; gap:10px; align-items:center; padding:16px 22px; border-bottom:1px solid var(--bd); transition:background .1s, border-left-color .15s; cursor:pointer; border-left:3px solid transparent; }
 .grow:last-child { border-bottom:none; }
-.grow:hover { background:rgba(255,255,255,.025); }
+.grow:hover { background:rgba(255,255,255,.03); border-left-color:var(--orange); }
 .gname { font-family:'Manrope',sans-serif; font-size:13px; font-weight:600; color:var(--t1); }
 .greq  { font-size:11px; color:var(--t3); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .gnum  { font-family:'Syne',sans-serif; font-weight:700; font-size:22px; text-align:center; }
@@ -230,27 +230,29 @@ select option { background:#161616; color:#ddd; }
 
   <!-- GAPS -->
   <div id="pgp" class="panel">
-    <div class="g2">
-      <div class="card">
-        <div class="ch"><span class="cn">Capability gap register</span><span class="cp" id="gp-pill"></span></div>
-        <div id="gap-list"></div>
+    <div class="card">
+      <div class="ch">
+        <span class="cn">Capability gap register</span>
+        <span class="cp" id="gp-pill"></span>
       </div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div class="card">
-          <div class="ch"><span class="cn">Bids blocked per gap — sorted by impact</span></div>
-          <div class="bars" id="gap-bars"></div>
-        </div>
-        <div class="stat-pair">
-          <div class="stat">
-            <div class="snum" style="color:var(--orange)" id="s-open"></div>
-            <div class="slbl">Open gaps</div>
-          </div>
-          <div class="stat">
-            <div class="snum" style="color:#F87171" id="s-blocked"></div>
-            <div class="slbl">Bids lost to gaps</div>
-          </div>
-        </div>
+      <div id="gap-list"></div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal-backdrop" onclick="closeModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;backdrop-filter:blur(4px)"></div>
+  <div id="modal" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1001;width:min(720px,92vw);max-height:82vh;overflow-y:auto;background:#111;border:1px solid rgba(255,255,255,.1);border-radius:12px;">
+    <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;position:sticky;top:0;background:#111;z-index:2">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:6px">Capability Gap</div>
+        <div id="modal-title" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;line-height:1.3"></div>
+        <div id="modal-req" style="font-size:12px;color:rgba(255,255,255,.45);margin-top:6px;line-height:1.5"></div>
       </div>
+      <button onclick="closeModal()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center">&#215;</button>
+    </div>
+    <div style="padding:8px 24px 24px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:14px 0 10px">Action items — bids blocked by this gap</div>
+      <div id="modal-bids"></div>
     </div>
   </div>
 
@@ -426,11 +428,7 @@ function rGaps(){
       '<div class="glnk">'+lnk+'</div>'+
       '</div>';
   }).join('');
-  var max=sorted.length?Number(sorted[0]['Bids Blocked'])||1:1;
-  var cols=['#E8870A','#F87171','#7CA9F8','#4DD8CE','#C084FC','#6EE8A0','#FBB045','#38BDF8'];
-  document.getElementById('gap-bars').innerHTML=sorted.map(function(g,i){
-    var v=Number(g['Bids Blocked'])||0;return bar(e(g['Blocking Criteria']),v,max,cols[i%cols.length]);
-  }).join('');
+
 }
 
 var MAP={ov:'pov',pl:'ppl',gp:'pgp'};
