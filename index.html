@@ -406,30 +406,74 @@ function rPl(){
 }
 
 /* Gaps */
+/* Bid lookup */
+const LOOKUP = {"Compatibility requirement": [{"id": "03887/2026", "title": "Data Protection and Archiving Software, Firewall Licenses, and Anti-Virus Licenses", "buyer": "Ministry of Agriculture, Forestry and Water Management", "region": "North Macedonia", "detail": "The RFP has been dropped, as the client requires compatibility with their existing Sophos environment.", "deadline": "07 Apr 2026", "status": "No-Go"}], "Pricing not competitive": [{"id": "05381/2026", "title": "Software licenses - Microsoft Office Home and Business 2024", "buyer": "Operational-Technical Agency Skopje", "region": "North Macedonia", "detail": "We did not receive a revised quote from SoftwareOne. The previously submitted pricing was not competitive.", "deadline": "14 Apr 2026", "status": "No-Go"}, {"id": "06283/2026", "title": "Software solution for IT process management - ManageEngine", "buyer": "Central Register of RSM", "region": "North Macedonia", "detail": "Distributor already registered with another partner. Unable to support with pricing for this opportunity.", "deadline": "17 Apr 2026", "status": "No-Go"}], "MAF": [{"id": "GEM/2026/B/7404928", "title": "Supply of 3  Microsoft Visual Studio Professional  Licenses", "buyer": "Hindustan Aeronautics Limited", "region": "India", "detail": "Requires Microsoft MAF Certificate", "deadline": "21 Apr 2026", "status": "No-Go"}, {"id": "GEM/2026/B/7406567", "title": "Windows Server 2025 Standard (5)", "buyer": "LEOS/ISRO", "region": "India", "detail": "Product Catalogue yet to be set up on GeM; Requires Microsoft authorization code and MAF certificate", "deadline": "27 Apr 2026", "status": "No-Go"}, {"id": "GEM/2026/B/7404669", "title": "Windows Server 2025 Standard (3)", "buyer": "ISRO Master Control Facility", "region": "India", "detail": "Product Catalogue yet to be set up on GeM; Requires Microsoft authorization code and MAF certificate", "deadline": "27 Apr 2026", "status": "No-Go"}, {"id": "227836-2026", "title": "Microsoft 365 and Azure Collaboration, Productivity, and Infrastructure Services Delivery", "buyer": "Association of Municipalities for the Sustainable Management of Waste of Greater Porto - LIPOR", "region": "Slovenia", "detail": "Additional considerations\n1. Microsoft EA Partner Status \u2014 Saints & Masters to hold, or be able to obtain, Microsoft authorization specifically covering the Enterprise Agreement / Enterprise Agreement Subscription.\n2. Payment Terms - The licenses are invoiced on a yearly basis during the beginning of the year. The bidder is to provision the license after which the invoice will be raised by the bidder. The client has a window of 60 days to clear any such invoices both in the case of fixed component and the variable component.\n3. Credit Period - Exploring the possibility of aligning the credit period of 60 days with SoftwareOne would help us resolve the cashflows.", "deadline": "30 Apr 2026", "status": "No-Go"}, {"id": "GEM/2026/B/7457275", "title": "Migration of an NIC-hosted environment to a commercial public cloud platform for a period of 2 years", "buyer": "Ministry Of Consumer Affairs Food And Public Distribution", "region": "India", "detail": "Unable to participate due to unmet CSP MAF eligibility requirements - Jio Cloud cannot provide the MAF certificate, while AWS and Oracle Cloud require public sector endorsements that are not currently held and cannot be obtained within the bid timeframe", "deadline": "05 May 2026", "status": "No-Go"}], "Product catalogue / GeM setup": [{"id": "GEM/2026/B/7407484", "title": "Supply of 1 SQL Server 2025 Enterprise Core (2 Core Pack) Perpetual License", "buyer": "Hindustan Aeronautics Limited", "region": "India", "detail": "Product Catalogue set up yet to be completed on GeM", "deadline": "22 Apr 2026", "status": "No-Go"}, {"id": "GEM/2026/B/7394714", "title": "MS Business Basic & Standard (198)", "buyer": "NTPC Mining Limited", "region": "India", "detail": "Product Catalogue set up yet to be completed on GeM", "deadline": "16 Apr 2026", "status": "No-Go"}], "Experience / PO count": [{"id": "OSS/2026", "title": "Integrated Renovation Services HOUSING FUNDS IN MACEDONIA", "buyer": "HABITAT", "region": "North Macedonia", "detail": "Minimum 1 functional platform similar in scope to OSS HABITAT, with detailed description and price of development (portfolio reference requirement).", "deadline": "10 Apr 2026", "status": "No-Go"}, {"id": "ODPU/2026", "title": "IBM/ HCL Domino services and services of electronic mail systems (MS Exchange and SMTP node)", "buyer": "MINISTRSTVO ZA JAVNO UPRAVO", "region": "Slovenia", "detail": "The RFP requires the primary bidder to hold independent client references (subcontractor references are explicitly disallowed) demonstrating: IBM/HCL Domino maintenance services delivered for at least 2 years, covering a minimum of 500 end-users at one location & MS Exchange 2016/2019/SE (On-Premises) maintenance services delivered for at least 1 year within the last 3 years, covering a minimum of 500 end-users at one location.", "deadline": "17 Apr 2026", "status": "No-Go"}, {"id": "05344/2026", "title": "Preventive maintenance and upgrading of software application for the Single Register of Agricultural Holdings - ERZS", "buyer": "Ministry of Agriculture, Forestry and Water Management", "region": "North Macedonia", "detail": "We do not meet the below requirement.\n- The Bidder shall have Experience, i.e. shall have implemented software applications for the development of a web application for downloading and entering data from other databases as well as integration with a GIS application in the last 10 (ten) years.\n\n-The Bidder shall have Experience, i.e. shall have implemented software applications for a quality implemented and executed service for working with data in Oracle 11g Enterprise Edition or higher in the last 10 (ten) years and \u00b7 The Bidder shall have Experience, i.e. shall have implemented software applications for a quality implemented and executed service for the establishment or integration of a Veterinary Information System in the last 10 (ten) years. \n\n-The bidder must have experience, i.e. have implemented software applications for a quality implemented and performed service for maintaining the database containing alphanumeric data for cadastral plots and property lists of the Real Estate Cadastre Agency - AREC or integration of the database containing alphanumeric data for cadastral plots and property lists from AREC with other systems and databases in the last 3 (three) years.", "deadline": "28 Apr 2026", "status": "No-Go"}, {"id": "JN-S0763", "title": "RENOVATION OF THE BUSINESS INFORMATION SYSTEM OF RTV SLOVENIA", "buyer": "RTV SLOVENIA", "region": "Slovenia", "detail": "Missing qualifying references: \n(1) Large ERP implementation (\u2265500 employees or >\u20ac2M contract value) covering ERP + 2 of DMS/BI/HRM since Jan 2018; \n(2) Public sector ERP implementation including civil servant payroll. All 5 named personnel (PM, ERP FM, Integration Architect, HRM Expert, DMS Expert) must have worked on a qualifying reference project.\nSubcontractor references are permitted but no qualifying partner currently identified. Bid also requires \u20ac100K bank guarantee at submission + 10% performance guarantee on contract value by primary bidder.", "deadline": "14 May 2026", "status": "No-Go"}, {"id": "ODAPM-48/2025", "title": "Application performance control systems", "buyer": "MINISTRY OF DIGITAL TRANSFORMATION", "region": "Slovenia", "detail": "The RFP requires the following conditions to fulfil the eligibility requirement which we currently do not possess,\n\n1. The bid requires two distinct reference implementations completed within the last three years: one in an SAP ABAP environment (1,500+ users) and one in a .NET/JAVA environment (1,500+ users).\n2. Section 12.3.3 of instructions states that a subcontractor can only fulfil the technical conditions (references, partner status) on our behalf if they deliver more than 70% of the contract \u2014 but at that point, they're essentially the prime contractor and Saints & Masters becomes the minority partner.\n3. Section 12.3.3 of the Instructions states that implementation services for both the MDP and FURS environments must be carried out directly by the bidder and the subcontractor's resources cannot be utilised for the implementation.\n4. The tech spec requires support in Slovenian, and local on-site support at the client's premises for any technical support required and for the 4-day training component which is a specific ask in the technical specifications. Only in case of emergencies, an alternative can be requested.", "deadline": "-", "status": "No-Go"}, {"id": "4300-5/2026", "title": "Development of the User Experience of the trgdela.si Online Platform", "buyer": "ZRSZ", "region": "Slovenia", "detail": "No-bid. Pure UX/UI design contract (630 designer-hours + 300 consulting hours over 26 months). Hard blockers: (1) no qualifying EUR 50,000+ UX/UI reference; (2) mandatory Senior UX Designer with 10+ years experience, and labour market UX project within last 5 years.", "deadline": "04 May 2026", "status": "No-Go"}, {"id": "NMV013/2026", "title": "Cybersecurity Measures in Accordance with ZInfV-1", "buyer": "Murska Sobota General Hospital", "region": "Slovenia", "detail": "We do not hold qualifying references to meet below thresholds.\nReference Requirements\nMinimum four active VOC service contracts with Slovenia-based clients, each operational for at least 12 months\nAt least three references must be essential healthcare entities under ZInfV-1\nTwo dedicated SIEM references required, each demonstrating management of a SIEM at \u22651,000 EPS or 50 GB/day with 24\u00d77 Tier-1 operations\n\nPersonnel Requirements\u00a0\nMinimum 7 Tier-1 VOC analysts with certifications including CEHv10, GIAC GCFE/CHFI, CySA+, Cisco CCNA Cyber Ops, SANS GICSP, and Microsoft Cybersecurity Architect Expert\nMinimum 3 Tier-2 analysts holding GIAC GNFA, GCIH, and GCFE\nMinimum 3 ISACA-certified information security management experts (CISM, CSX-F, CGEIT)\nMinimum 1 PMI-PMP or IPMA Level C certified project manager", "deadline": "12 May 2026", "status": "No-Go"}], "Certification gap": [{"id": "05270/2026", "title": "Procurement of a software solution for office and archive operations and its integration with DMS-AIS configured on an M-files database", "buyer": "Institute for Accreditation of the Republic of Macedonia", "region": "North Macedonia", "detail": "We do not meet the below requirement.\n- at least 2 (two) employees or hired persons - certified for work with M-Files by the manufacturer", "deadline": "14 Apr 2026", "status": "No-Go"}], "Other": [{"id": "06890/2026", "title": "Platform for Infrastructure, Application and User Monitoring for Government CSIRT", "buyer": "Ministry of Digital Transformation, North Macedonia", "region": "North Macedonia", "detail": "Requires a centralised monitoring platform. Datadog, Dynatrace are ideal fits. \n- No response from ManageEngine", "deadline": "06 May 2026", "status": "No-Go"}]};
+
 function rGaps(){
   var sorted=G.slice().sort(function(a,b){return Number(b['Bids Blocked'])-Number(a['Bids Blocked']);});
-  var open=sorted.filter(function(g){return g.Status!=='Closed';}).length;
-  var blocked=sorted.reduce(function(a,g){return a+Number(g['Bids Blocked']||0);},0);
-  document.getElementById('gp-pill').textContent=sorted.length+' gaps';
-  document.getElementById('s-open').textContent=open;
-  document.getElementById('s-blocked').textContent=blocked;
-  document.getElementById('gap-list').innerHTML=sorted.map(function(g){
+  document.getElementById('gp-pill').textContent=sorted.length+' gaps · click to drill down';
+  document.getElementById('gap-list').innerHTML=sorted.map(function(g,idx){
     var n=Number(g['Bids Blocked'])||0;
     var nc=n>=5?'gnh':n>=3?'gnm':'gnl';
     var bc=g.Status==='Closed'?'bw':g.Status==='In Progress'?'bp':'bn';
-    var lnk=g['View Specific Bids']&&g['View Specific Bids']!=='Add filtered view URL here'
-      ?'<a href="'+g['View Specific Bids']+'" target="_blank">View &#8594;</a>'
-      :'<span style="color:var(--t3);font-size:11px">—</span>';
-    return '<div class="grow">'+
-      '<div><div class="gname">'+(e(g['Blocking Criteria'])||'—')+'</div>'+
-      '<div class="greq" title="'+e(g['Specific Requirement'])+'">'+(e(g['Specific Requirement'])||'No requirement recorded')+'</div></div>'+
+    return '<div class="grow" onclick="openModal('+idx+')">'+
+      '<div>'+
+        '<div class="gname">'+(e(g['Blocking Criteria'])||'—')+
+          '<span style="font-size:10px;color:var(--t3);font-weight:400;margin-left:8px">see action items →</span>'+
+        '</div>'+
+        '<div class="greq" title="'+e(g['Specific Requirement'])+'">'+(e(g['Specific Requirement'])||'No specific requirement recorded')+'</div>'+
+      '</div>'+
       '<div class="gnum '+nc+'">'+n+'</div>'+
       '<div><span class="badge '+bc+'" style="font-size:9px;padding:2px 7px">'+(g.Status||'Open')+'</span></div>'+
-      '<div class="glnk">'+lnk+'</div>'+
       '</div>';
   }).join('');
-
 }
+
+function openModal(idx){
+  var sorted=G.slice().sort(function(a,b){return Number(b['Bids Blocked'])-Number(a['Bids Blocked']);});
+  var g=sorted[idx];
+  var criteria=g['Blocking Criteria']||'';
+  var bids=LOOKUP[criteria]||[];
+  document.getElementById('modal-title').textContent=criteria;
+  document.getElementById('modal-req').textContent=
+    g['Specific Requirement']&&g['Specific Requirement']!=='None'
+    ?'General requirement: '+g['Specific Requirement']
+    :'See individual bid details below.';
+  document.getElementById('modal-bids').innerHTML=bids.length
+    ?bids.map(function(b){
+        var detail=b.detail&&b.detail!=='None'&&b.detail.trim()?b.detail:null;
+        return '<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-left:3px solid var(--orange);border-radius:8px;padding:16px 18px;margin-bottom:10px">'+
+          '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px">'+
+            '<div>'+
+              '<div style="font-family:Syne,sans-serif;font-size:14px;font-weight:600;color:#fff;margin-bottom:3px">'+(e(b.title)||'—')+'</div>'+
+              '<div style="font-size:12px;color:rgba(255,255,255,.4)">'+(e(b.buyer)||'—')+' · '+(b.region||'—')+'</div>'+
+            '</div>'+
+            '<div style="text-align:right;flex-shrink:0">'+
+              '<div style="font-size:11px;color:rgba(255,255,255,.3)">'+(b.id||'')+'</div>'+
+              (b.deadline&&b.deadline!=='None'?'<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:2px">'+b.deadline+'</div>':'')+
+            '</div>'+
+          '</div>'+
+          (detail
+            ?'<div style="background:rgba(232,135,10,.08);border:1px solid rgba(232,135,10,.2);border-radius:6px;padding:10px 14px;margin-top:10px">'+
+               '<div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange);margin-bottom:5px">Exact requirement / reason</div>'+
+               '<div style="font-size:12.5px;color:rgba(255,255,255,.75);line-height:1.6">'+e(detail)+'</div>'+
+             '</div>'
+            :'<div style="font-size:12px;color:rgba(255,255,255,.25);margin-top:8px;font-style:italic">No specific detail recorded for this bid.</div>'
+          )+
+          '</div>';
+      }).join('')
+    :'<div style="color:rgba(255,255,255,.3);font-size:13px;padding:16px 0">No bids found for this gap in pipeline data.</div>';
+  document.getElementById('modal-backdrop').style.display='block';
+  document.getElementById('modal').style.display='block';
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){
+  document.getElementById('modal-backdrop').style.display='none';
+  document.getElementById('modal').style.display='none';
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',function(ev){if(ev.key==='Escape')closeModal();});
 
 var MAP={ov:'pov',pl:'ppl',gp:'pgp'};
 function go(k,btn){
