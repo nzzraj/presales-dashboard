@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PreSales Operations — Saints & Masters</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/msal-browser/3.10.0/msal-browser.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:       #0F2340;
+    --navy-mid:   #1A3660;
+    --blue:       #2563EB;
+    --blue-light: #EFF6FF;
+    --teal:       #0D9488;
+    --teal-light: #F0FDFA;
+    --amber:      #D97706;
+    --amber-light:#FFFBEB;
+    --red:        #DC2626;
+    --red-light:  #FEF2F2;
+    --green:      #16A34A;
+    --green-light:#F0FDF4;
+    --grey:       #64748B;
+    --grey-light: #F8FAFC;
+    --border:     #E2E8F0;
+    --text:       #0F172A;
+    --text-muted: #64748B;
+    --white:      #FFFFFF;
+    --shadow:     0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md:  0 4px 6px rgba(0,0,0,.06), 0 2px 4px rgba(0,0,0,.04);
+    --radius:     10px;
+    --radius-sm:  6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #F1F5F9;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--navy);
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .logo-mark {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--teal) 100%);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 15px; color: white;
+    letter-spacing: -1px;
+  }
+  .topbar-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600; font-size: 15px; color: white;
+    letter-spacing: 0.02em;
+  }
+  .topbar-sub { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .last-refresh { font-size: 11px; color: rgba(255,255,255,0.4); }
+  .btn-refresh {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: white; font-size: 12px; padding: 6px 14px;
+    border-radius: var(--radius-sm); cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background .15s;
+  }
+  .btn-refresh:hover { background: rgba(255,255,255,0.18); }
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px; padding: 4px 12px 4px 4px;
+  }
+  .user-avatar {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--teal));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: white;
+  }
+  .user-name { font-size: 12px; color: rgba(255,255,255,0.8); }
+
+  /* ── Login screen ── */
+  #login-screen {
+    min-height: calc(100vh - 56px);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-card {
+    background: white; border-radius: 16px;
+    padding: 48px 40px; text-align: center;
+    box-shadow: var(--shadow-md); max-width: 380px; width: 100%;
+  }
+  .login-logo {
+    width: 56px; height: 56px; margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px;
+    color: white; letter-spacing: -2px;
+  }
+  .login-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 22px;
+    color: var(--navy); margin-bottom: 6px;
+  }
+  .login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6; }
+  .btn-signin {
+    width: 100%; padding: 12px 20px;
+    background: var(--navy);
+    color: white; border: none; border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 10px; transition: background .15s;
+  }
+  .btn-signin:hover { background: var(--navy-mid); }
+  .ms-icon { width: 18px; height: 18px; }
+
+  /* ── Main layout ── */
+  #dashboard { display: none; }
+  .main { padding: 24px 28px; max-width: 1600px; margin: 0 auto; }
+
+  /* ── Tab nav ── */
+  .tab-nav {
+    display: flex; gap: 0;
+    background: white; border-radius: var(--radius);
+    padding: 4px; box-shadow: var(--shadow);
+    margin-bottom: 20px; width: fit-content;
+  }
+  .tab-btn {
+    padding: 8px 20px; font-size: 13px; font-weight: 500;
+    border: none; background: none; cursor: pointer;
+    border-radius: 7px; color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif; transition: all .15s;
+  }
+  .tab-btn.active {
+    background: var(--navy); color: white;
+  }
+  .tab-btn:hover:not(.active) { background: var(--grey-light); color: var(--text); }
+
+  /* ── KPI cards ── */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    gap: 12px; margin-bottom: 20px;
+  }
+  .kpi-card {
+    background: white; border-radius: var(--radius);
+    padding: 16px 18px; box-shadow: var(--shadow);
+    border-top: 3px solid var(--border);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .kpi-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .kpi-card.c-blue   { border-color: var(--blue); }
+  .kpi-card.c-teal   { border-color: var(--teal); }
+  .kpi-card.c-amber  { border-color: var(--amber); }
+  .kpi-card.c-red    { border-color: var(--red); }
+  .kpi-card.c-green  { border-color: var(--green); }
+  .kpi-card.c-navy   { border-color: var(--navy); }
+  .kpi-val {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 28px; line-height: 1; margin-bottom: 4px;
+  }
+  .kpi-card.c-blue  .kpi-val { color: var(--blue); }
+  .kpi-card.c-teal  .kpi-val { color: var(--teal); }
+  .kpi-card.c-amber .kpi-val { color: var(--amber); }
+  .kpi-card.c-red   .kpi-val { color: var(--red); }
+  .kpi-card.c-green .kpi-val { color: var(--green); }
+  .kpi-card.c-navy  .kpi-val { color: var(--navy); }
+  .kpi-lbl { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* ── Cards ── */
+  .card {
+    background: white; border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .card-header {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif; font-weight: 600;
+    font-size: 13px; color: var(--navy); letter-spacing: 0.02em;
+  }
+  .card-count {
+    font-size: 11px; color: var(--text-muted);
+    background: var(--grey-light); padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* ── Two column layout ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .three-col { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+  /* ── Pipeline table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  thead th {
+    background: var(--grey-light); color: var(--text-muted);
+    font-weight: 500; font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 8px 12px; text-align: left;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
+  }
+  tbody td {
+    padding: 9px 12px; border-bottom: 1px solid var(--border);
+    color: var(--text); vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--grey-light); }
+  .td-title { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .td-buyer { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted); font-size: 12px; }
+
+  /* ── Status badges ── */
+  .badge {
+    display: inline-flex; align-items: center;
+    font-size: 11px; font-weight: 500; padding: 3px 9px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .badge-blue   { background: #DBEAFE; color: #1D4ED8; }
+  .badge-teal   { background: #CCFBF1; color: #0F766E; }
+  .badge-amber  { background: #FEF3C7; color: #B45309; }
+  .badge-red    { background: #FEE2E2; color: #B91C1C; }
+  .badge-green  { background: #DCFCE7; color: #15803D; }
+  .badge-grey   { background: #F1F5F9; color: #475569; }
+  .badge-navy   { background: #E0E7FF; color: #3730A3; }
+
+  /* ── Win probability dots ── */
+  .win-dot {
+    display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; margin-right: 5px;
+  }
+  .win-high  { background: var(--green); }
+  .win-med   { background: var(--amber); }
+  .win-low   { background: var(--red); }
+
+  /* ── Bar chart ── */
+  .bar-chart { padding: 14px 18px; }
+  .bar-item { margin-bottom: 10px; }
+  .bar-label-row {
+    display: flex; justify-content: space-between;
+    font-size: 12px; margin-bottom: 4px;
+  }
+  .bar-label { color: var(--text); font-weight: 400; max-width: 75%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-count { font-weight: 600; color: var(--navy); }
+  .bar-track { background: #F1F5F9; border-radius: 4px; height: 7px; overflow: hidden; }
+  .bar-fill  { height: 7px; border-radius: 4px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+
+  /* ── Funnel ── */
+  .funnel-wrap { padding: 14px 18px; }
+  .funnel-item {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .funnel-label { font-size: 12px; color: var(--text); width: 120px; flex-shrink: 0; }
+  .funnel-track { flex: 1; background: #F1F5F9; border-radius: 4px; height: 7px; overflow: hidden; }
+  .funnel-fill  { height: 7px; border-radius: 4px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+  .funnel-count { font-size: 12px; font-weight: 600; color: var(--navy); width: 20px; text-align: right; }
+
+  /* ── Region cards ── */
+  .region-list { padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
+  .region-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; background: var(--grey-light);
+    border-radius: var(--radius-sm);
+  }
+  .region-name { font-size: 13px; font-weight: 500; }
+  .region-stats { display: flex; gap: 12px; align-items: center; }
+  .region-stat { font-size: 11px; color: var(--text-muted); }
+  .region-stat strong { color: var(--text); }
+
+  /* ── Gap register ── */
+  .gap-row {
+    display: grid;
+    grid-template-columns: 1fr 44px 44px auto;
+    gap: 12px; align-items: center;
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .gap-row:last-child { border-bottom: none; }
+  .gap-row:hover { background: var(--grey-light); }
+  .gap-name { font-size: 13px; font-weight: 500; }
+  .gap-req  { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gap-count {
+    font-family: 'Syne', sans-serif; font-weight: 700;
+    font-size: 18px; text-align: center;
+  }
+  .gap-count.high { color: var(--red); }
+  .gap-count.med  { color: var(--amber); }
+  .gap-count.low  { color: var(--text-muted); }
+  .gap-link a {
+    font-size: 11px; color: var(--blue); text-decoration: none;
+    padding: 4px 10px; border: 1px solid #BFDBFE;
+    border-radius: 20px; white-space: nowrap;
+    transition: background .15s;
+  }
+  .gap-link a:hover { background: #EFF6FF; }
+  .gap-link span { font-size: 11px; color: var(--border); font-style: italic; }
+
+  /* ── Deadline highlight ── */
+  .deadline-soon { color: var(--red); font-weight: 500; }
+  .deadline-week { color: var(--amber); font-weight: 500; }
+
+  /* ── Loading ── */
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 200px; color: var(--text-muted); font-size: 13px;
+    gap: 10px;
+  }
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid var(--border);
+    border-top-color: var(--blue); border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Error ── */
+  .error-bar {
+    background: var(--red-light); border: 1px solid #FECACA;
+    color: var(--red); padding: 10px 16px; border-radius: var(--radius-sm);
+    font-size: 13px; margin-bottom: 16px; display: none;
+  }
+
+  /* ── Tab panels ── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+    .three-col { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 700px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .main { padding: 14px; }
+    .topbar { padding: 0 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo-mark">S&M</div>
+    <div>
+      <div class="topbar-title">PreSales Operations</div>
+      <div class="topbar-sub">Saints &amp; Masters</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span class="last-refresh" id="last-refresh"></span>
+    <button class="btn-refresh" id="btn-refresh" style="display:none" onclick="loadData()">↻ Refresh</button>
+    <div class="user-chip" id="user-chip" style="display:none">
+      <div class="user-avatar" id="user-initials">?</div>
+      <span class="user-name" id="user-name-display">Loading...</span>
+    </div>
+  </div>
+</header>
+
+<!-- Login screen -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">S&M</div>
+    <div class="login-title">PreSales Dashboard</div>
+    <div class="login-sub">Sign in with your Saints &amp; Masters Microsoft account to access live pipeline data.</div>
+    <button class="btn-signin" onclick="signIn()">
+      <svg class="ms-icon" viewBox="0 0 21 21" fill="none">
+        <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
+        <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
+        <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
+        <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+      </svg>
+      Sign in with Microsoft
+    </button>
+  </div>
+</div>
+
+<!-- Main dashboard -->
+<div id="dashboard">
+  <div class="main">
+    <div class="error-bar" id="error-bar"></div>
+
+    <!-- Tabs -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+      <button class="tab-btn" onclick="switchTab('pipeline')">Pipeline</button>
+      <button class="tab-btn" onclick="switchTab('gaps')">Capability Gaps</button>
+    </div>
+
+    <!-- OVERVIEW TAB -->
+    <div id="tab-overview" class="tab-panel active">
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="loading"><div class="spinner"></div> Loading…</div>
+      </div>
+      <div class="three-col">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Live pipeline</span>
+            <span class="card-count" id="pipeline-count">—</span>
+          </div>
+          <div class="table-wrap" id="overview-pipeline-table">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">RFP funnel</span></div>
+          <div class="funnel-wrap" id="funnel-chart">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">By region</span></div>
+          <div class="region-list" id="region-chart">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Top no-go reasons</span></div>
+          <div class="bar-chart" id="nogo-chart">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Upcoming deadlines</span></div>
+          <div class="table-wrap" id="deadlines-table">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIPELINE TAB -->
+    <div id="tab-pipeline" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">All RFPs</span>
+          <span class="card-count" id="all-count">—</span>
+        </div>
+        <div style="padding:10px 18px; border-bottom:1px solid var(--border); display:flex; gap:8px; flex-wrap:wrap;">
+          <select id="filter-status" onchange="renderPipelineTable()" style="font-family:DM Sans,sans-serif;font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);">
+            <option value="">All statuses</option>
+            <option>Under Evaluation</option>
+            <option>In Progress</option>
+            <option>Submitted</option>
+            <option>No-Go</option>
+            <option>Won</option>
+            <option>Lost</option>
+          </select>
+          <select id="filter-region" onchange="renderPipelineTable()" style="font-family:DM Sans,sans-serif;font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);">
+            <option value="">All regions</option>
+            <option>North Macedonia</option>
+            <option>India</option>
+            <option>Slovenia</option>
+          </select>
+          <select id="filter-win" onchange="renderPipelineTable()" style="font-family:DM Sans,sans-serif;font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);">
+            <option value="">All win probabilities</option>
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
+          </select>
+        </div>
+        <div class="table-wrap" id="full-pipeline-table">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAPS TAB -->
+    <div id="tab-gaps" class="tab-panel">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Capability gap register</span>
+            <span class="card-count" id="gap-count">—</span>
+          </div>
+          <div id="gap-register-list">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Gaps by category</span></div>
+          <div class="bar-chart" id="gap-chart">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Config ───────────────────────────────────────────────────
+const CLIENT_ID  = '4493793a-5418-4312-bd34-7b233f6a7c4f';
+const TENANT_ID  = 'SaintsMastersPvtLtd.onmicrosoft.com';
+const FILE_ID    = '027CB9BF-24AF-4F7B-91F7-C8C6E83C5DC0';
+const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
+const SCOPES     = ['Files.Read', 'User.Read'];
+
+const msalConfig = {
+  auth: {
+    clientId: CLIENT_ID,
+    authority: `https://login.microsoftonline.com/${TENANT_ID}`,
+    redirectUri: window.location.href.split('?')[0].split('#')[0],
+  },
+  cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
+};
+
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+let allPipeline = [], allGaps = [], currentUser = null;
+
+// ── Auth ─────────────────────────────────────────────────────
+async function signIn() {
+  try {
+    await msalInstance.initialize();
+    const resp = await msalInstance.loginPopup({ scopes: SCOPES });
+    currentUser = resp.account;
+    onSignedIn();
+  } catch(e) {
+    showError('Sign-in failed: ' + e.message);
+  }
+}
+
+async function getToken() {
+  const accounts = msalInstance.getAllAccounts();
+  if (!accounts.length) throw new Error('Not signed in');
+  try {
+    const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
+    return r.accessToken;
+  } catch {
+    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
+    return r.accessToken;
+  }
+}
+
+async function initMsal() {
+  await msalInstance.initialize();
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length) {
+    currentUser = accounts[0];
+    onSignedIn();
+  }
+}
+
+function onSignedIn() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('btn-refresh').style.display = 'block';
+  document.getElementById('user-chip').style.display = 'flex';
+  const name = currentUser.name || currentUser.username;
+  document.getElementById('user-name-display').textContent = name.split(' ')[0];
+  const initials = name.split(' ').map(p=>p[0]).join('').substring(0,2).toUpperCase();
+  document.getElementById('user-initials').textContent = initials;
+  loadData();
+}
+
+// ── Data fetching ────────────────────────────────────────────
+async function fetchTable(tableName) {
+  const token = await getToken();
+  const url = `${GRAPH_BASE}/me/drive/items/${FILE_ID}/workbook/tables/${tableName}/rows`;
+  const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!resp.ok) throw new Error(`Failed to fetch ${tableName}: ${resp.status} ${resp.statusText}`);
+  const data = await resp.json();
+  // Get headers
+  const hdrResp = await fetch(
+    `${GRAPH_BASE}/me/drive/items/${FILE_ID}/workbook/tables/${tableName}/columns`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  const hdrData = await hdrResp.json();
+  const headers = hdrData.value.map(c => c.name);
+  return data.value.map(row => {
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = row.values[0][i]; });
+    return obj;
+  });
+}
+
+async function loadData() {
+  try {
+    document.getElementById('error-bar').style.display = 'none';
+    allPipeline = await fetchTable('RFPPipeline');
+    allGaps     = await fetchTable('GapRegister');
+    renderAll();
+    const now = new Date();
+    document.getElementById('last-refresh').textContent =
+      'Refreshed ' + now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+  } catch(e) {
+    showError('Could not load data: ' + e.message);
+  }
+}
+
+// ── Render all ───────────────────────────────────────────────
+function renderAll() {
+  renderKPIs();
+  renderOverviewPipeline();
+  renderFunnel();
+  renderRegions();
+  renderNogoChart();
+  renderDeadlines();
+  renderPipelineTable();
+  renderGapRegister();
+  renderGapChart();
+}
+
+// ── KPIs ────────────────────────────────────────────────────
+function renderKPIs() {
+  const count = s => allPipeline.filter(r => r.Status === s).length;
+  const cards = [
+    { label:'Total RFPs',       val: allPipeline.length, cls:'c-navy' },
+    { label:'Under Evaluation', val: count('Under Evaluation'), cls:'c-amber' },
+    { label:'In Progress',      val: count('In Progress'), cls:'c-blue' },
+    { label:'Submitted',        val: count('Submitted'), cls:'c-teal' },
+    { label:'Won',              val: count('Won'), cls:'c-green' },
+    { label:'No-Go / Lost',     val: count('No-Go') + count('Lost'), cls:'c-red' },
+  ];
+  document.getElementById('kpi-grid').innerHTML = cards.map(c =>
+    `<div class="kpi-card ${c.cls}">
+      <div class="kpi-val">${c.val}</div>
+      <div class="kpi-lbl">${c.label}</div>
+    </div>`).join('');
+}
+
+// ── Status badge ────────────────────────────────────────────
+function statusBadge(s) {
+  const m = {
+    'Under Evaluation':'badge-amber','In Progress':'badge-blue',
+    'Submitted':'badge-teal','No-Go':'badge-red',
+    'Won':'badge-green','Lost':'badge-grey'
+  };
+  return `<span class="badge ${m[s]||'badge-grey'}">${s||'—'}</span>`;
+}
+
+function winBadge(w) {
+  if (!w) return '—';
+  const cls = w==='High'?'win-high':w==='Medium'?'win-med':'win-low';
+  return `<span class="win-dot ${cls}"></span>${w}`;
+}
+
+// ── Overview pipeline ────────────────────────────────────────
+function renderOverviewPipeline() {
+  const live = allPipeline.filter(r =>
+    ['In Progress','Submitted','Under Evaluation'].includes(r.Status)
+  ).slice(0, 8);
+  document.getElementById('pipeline-count').textContent = live.length + ' active';
+  document.getElementById('overview-pipeline-table').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>RFP Title</th><th>Buyer</th><th>Status</th><th>Deadline</th>
+      </tr></thead>
+      <tbody>${live.map(r=>`<tr>
+        <td><div class="td-title" title="${esc(r['RFP Title'])}">${esc(r['RFP Title'])||'—'}</div></td>
+        <td><div class="td-buyer" title="${esc(r['Issuing Authority'])}">${esc(r['Issuing Authority'])||'—'}</div></td>
+        <td>${statusBadge(r.Status)}</td>
+        <td>${deadlineCell(r['Submission Deadline'])}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+}
+
+// ── Funnel ───────────────────────────────────────────────────
+function renderFunnel() {
+  const stages = [
+    {label:'Identified', val: allPipeline.length, color:'#64748B'},
+    {label:'Evaluating', val: allPipeline.filter(r=>r.Status==='Under Evaluation').length, color:'#D97706'},
+    {label:'In Progress', val: allPipeline.filter(r=>r.Status==='In Progress').length, color:'#2563EB'},
+    {label:'Submitted',   val: allPipeline.filter(r=>r.Status==='Submitted').length, color:'#0D9488'},
+    {label:'Won',         val: allPipeline.filter(r=>r.Status==='Won').length, color:'#16A34A'},
+    {label:'No-Go/Lost',  val: allPipeline.filter(r=>['No-Go','Lost'].includes(r.Status)).length, color:'#DC2626'},
+  ];
+  const max = stages[0].val || 1;
+  document.getElementById('funnel-chart').innerHTML = stages.map(s=>`
+    <div class="funnel-item">
+      <div class="funnel-label">${s.label}</div>
+      <div class="funnel-track"><div class="funnel-fill" style="width:${(s.val/max*100).toFixed(1)}%;background:${s.color}"></div></div>
+      <div class="funnel-count">${s.val}</div>
+    </div>`).join('');
+}
+
+// ── Regions ──────────────────────────────────────────────────
+function renderRegions() {
+  const regions = ['North Macedonia','India','Slovenia'];
+  const rows = regions.map(reg => {
+    const items = allPipeline.filter(r=>r.Region===reg);
+    const live  = items.filter(r=>['In Progress','Submitted','Under Evaluation'].includes(r.Status)).length;
+    const won   = items.filter(r=>r.Status==='Won').length;
+    return { reg, total:items.length, live, won };
+  }).filter(r=>r.total>0);
+  document.getElementById('region-chart').innerHTML = rows.map(r=>`
+    <div class="region-item">
+      <div class="region-name">${r.reg}</div>
+      <div class="region-stats">
+        <div class="region-stat"><strong>${r.total}</strong> total</div>
+        <div class="region-stat"><strong>${r.live}</strong> live</div>
+        <div class="region-stat" style="color:var(--green)"><strong>${r.won}</strong> won</div>
+      </div>
+    </div>`).join('') || '<div style="padding:18px;color:var(--text-muted);font-size:13px;">No data</div>';
+}
+
+// ── No-go chart ──────────────────────────────────────────────
+function renderNogoChart() {
+  const nogo = allPipeline.filter(r=>r.Status==='No-Go' && r['Blocking Criteria']);
+  const counts = {};
+  nogo.forEach(r => { const c=r['Blocking Criteria']; counts[c]=(counts[c]||0)+1; });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const max = sorted[0]?.[1] || 1;
+  const colors = ['#DC2626','#EA580C','#D97706','#65A30D','#0891B2','#7C3AED','#DB2777','#0D9488','#2563EB','#64748B'];
+  document.getElementById('nogo-chart').innerHTML = sorted.length ?
+    sorted.map(([label,val],i)=>`
+      <div class="bar-item">
+        <div class="bar-label-row">
+          <span class="bar-label">${label}</span>
+          <span class="bar-count">${val}</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(val/max*100).toFixed(1)}%;background:${colors[i%colors.length]}"></div></div>
+      </div>`).join('') :
+    '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">No No-Go bids with blocking criteria recorded.</div>';
+}
+
+// ── Deadlines ────────────────────────────────────────────────
+function deadlineCell(d) {
+  if (!d || d === 'None' || d === '') return '<span style="color:var(--text-muted)">—</span>';
+  const parsed = new Date(d);
+  if (isNaN(parsed)) return d;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.ceil((parsed - today) / 86400000);
+  const str = parsed.toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+  if (diff < 0) return `<span style="color:var(--text-muted)">${str}</span>`;
+  if (diff <= 3) return `<span class="deadline-soon">⚠ ${str}</span>`;
+  if (diff <= 7) return `<span class="deadline-week">${str}</span>`;
+  return str;
+}
+
+function renderDeadlines() {
+  const upcoming = allPipeline
+    .filter(r => ['In Progress','Submitted','Under Evaluation'].includes(r.Status) && r['Submission Deadline'])
+    .filter(r => { const d=new Date(r['Submission Deadline']); return !isNaN(d); })
+    .sort((a,b)=>new Date(a['Submission Deadline'])-new Date(b['Submission Deadline']))
+    .slice(0,8);
+  document.getElementById('deadlines-table').innerHTML = upcoming.length ? `
+    <table>
+      <thead><tr><th>RFP</th><th>Region</th><th>Deadline</th><th>Status</th></tr></thead>
+      <tbody>${upcoming.map(r=>`<tr>
+        <td><div class="td-title" style="max-width:180px" title="${esc(r['RFP Title'])}">${esc(r['RFP Title'])||'—'}</div></td>
+        <td style="color:var(--text-muted);font-size:12px">${r.Region||'—'}</td>
+        <td>${deadlineCell(r['Submission Deadline'])}</td>
+        <td>${statusBadge(r.Status)}</td>
+      </tr>`).join('')}</tbody>
+    </table>` :
+    '<div style="padding:18px;color:var(--text-muted);font-size:13px;">No upcoming deadlines.</div>';
+}
+
+// ── Full pipeline table ───────────────────────────────────────
+function renderPipelineTable() {
+  const fs = document.getElementById('filter-status')?.value || '';
+  const fr = document.getElementById('filter-region')?.value || '';
+  const fw = document.getElementById('filter-win')?.value || '';
+  let data = allPipeline;
+  if (fs) data = data.filter(r=>r.Status===fs);
+  if (fr) data = data.filter(r=>r.Region===fr);
+  if (fw) data = data.filter(r=>r['Win Probability']===fw);
+  document.getElementById('all-count').textContent = data.length + ' RFPs';
+  document.getElementById('full-pipeline-table').innerHTML = `
+    <table>
+      <thead><tr>
+        <th>RFP ID</th><th>Title</th><th>Issuing Authority</th>
+        <th>Region</th><th>Status</th><th>Win Prob</th>
+        <th>Submission Deadline</th><th>Value</th><th>Blocking Criteria</th>
+      </tr></thead>
+      <tbody>${data.map(r=>`<tr>
+        <td style="font-size:11px;color:var(--text-muted);white-space:nowrap">${esc(r['RFP ID'])||'—'}</td>
+        <td><div class="td-title" style="max-width:220px" title="${esc(r['RFP Title'])}">${esc(r['RFP Title'])||'—'}</div></td>
+        <td><div class="td-buyer" style="max-width:150px" title="${esc(r['Issuing Authority'])}">${esc(r['Issuing Authority'])||'—'}</div></td>
+        <td style="font-size:12px;white-space:nowrap">${r.Region||'—'}</td>
+        <td>${statusBadge(r.Status)}</td>
+        <td style="font-size:12px">${winBadge(r['Win Probability'])}</td>
+        <td>${deadlineCell(r['Submission Deadline'])}</td>
+        <td style="font-size:12px;white-space:nowrap">${r['RFP Value']||'—'}</td>
+        <td style="font-size:11px;color:var(--text-muted)">${esc(r['Blocking Criteria'])||'—'}</td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+}
+
+// ── Gap register ─────────────────────────────────────────────
+function renderGapRegister() {
+  const sorted = [...allGaps].sort((a,b)=>Number(b['Bids Blocked'])-Number(a['Bids Blocked']));
+  document.getElementById('gap-count').textContent = sorted.length + ' gaps';
+  document.getElementById('gap-register-list').innerHTML = sorted.map(g => {
+    const n = Number(g['Bids Blocked']) || 0;
+    const cls = n >= 5 ? 'high' : n >= 3 ? 'med' : 'low';
+    const link = g['View Specific Bids'] && g['View Specific Bids'] !== 'Add filtered view URL here'
+      ? `<a href="${g['View Specific Bids']}" target="_blank">View bids →</a>`
+      : `<span>—</span>`;
+    return `<div class="gap-row">
+      <div>
+        <div class="gap-name">${esc(g['Blocking Criteria'])||'—'}</div>
+        <div class="gap-req" title="${esc(g['Specific Requirement'])}">${esc(g['Specific Requirement'])||'No requirement recorded'}</div>
+      </div>
+      <div class="gap-count ${cls}">${n}</div>
+      <div><span class="badge ${g.Status==='Closed'?'badge-green':g.Status==='In Progress'?'badge-blue':'badge-red'}" style="font-size:10px">${g.Status||'Open'}</span></div>
+      <div class="gap-link">${link}</div>
+    </div>`;
+  }).join('') || '<div style="padding:18px;color:var(--text-muted)">No gaps recorded.</div>';
+}
+
+// ── Gap chart ────────────────────────────────────────────────
+function renderGapChart() {
+  const sorted = [...allGaps].sort((a,b)=>Number(b['Bids Blocked'])-Number(a['Bids Blocked']));
+  const max = Number(sorted[0]?.['Bids Blocked']) || 1;
+  const colors = ['#DC2626','#EA580C','#D97706','#0891B2','#7C3AED','#2563EB','#0D9488','#65A30D','#DB2777'];
+  document.getElementById('gap-chart').innerHTML = sorted.map((g,i)=>{
+    const val = Number(g['Bids Blocked']) || 0;
+    return `<div class="bar-item">
+      <div class="bar-label-row">
+        <span class="bar-label">${esc(g['Blocking Criteria'])}</span>
+        <span class="bar-count">${val} bid${val!==1?'s':''}</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/max*100).toFixed(1)}%;background:${colors[i%colors.length]}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── Utilities ────────────────────────────────────────────────
+function esc(s) {
+  if (!s || s === 'None' || s === 'null') return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-bar');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['overview','pipeline','gaps'][i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ── Init ──────────────────────────────────────────────────────
+initMsal();
+</script>
+</body>
+</html>
