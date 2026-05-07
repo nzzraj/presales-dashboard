@@ -507,19 +507,27 @@
 
 <script>
 // ── Config ───────────────────────────────────────────────────
-const CLIENT_ID  = '4493793a-5418-4312-bd34-7b233f6a7c4f';
-const TENANT_ID  = 'SaintsMastersPvtLtd.onmicrosoft.com';
-const FILE_ID    = '027CB9BF-24AF-4F7B-91F7-C8C6E83C5DC0';
-const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
-const SCOPES     = ['Files.Read', 'User.Read'];
+const CLIENT_ID   = '4493793a-5418-4312-bd34-7b233f6a7c4f';
+const TENANT_ID   = 'SaintsMastersPvtLtd.onmicrosoft.com';
+const FILE_ID     = '027CB9BF-24AF-4F7B-91F7-C8C6E83C5DC0';
+const REDIRECT_URI = 'https://presales-dashboard-rho.vercel.app';
+const GRAPH_BASE  = 'https://graph.microsoft.com/v1.0';
+const SCOPES      = ['Files.Read', 'User.Read'];
 
 const msalConfig = {
   auth: {
     clientId: CLIENT_ID,
     authority: `https://login.microsoftonline.com/${TENANT_ID}`,
-    redirectUri: window.location.href.split('?')[0].split('#')[0],
+    redirectUri: REDIRECT_URI,
+    navigateToLoginRequestUrl: false,
   },
-  cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
+  cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
+  system: {
+    loggerOptions: {
+      loggerCallback: (level, message) => { if (level <= 1) console.warn('[MSAL]', message); },
+      logLevel: msal.LogLevel.Warning,
+    }
+  }
 };
 
 const msalInstance = new msal.PublicClientApplication(msalConfig);
@@ -527,13 +535,23 @@ let allPipeline = [], allGaps = [], currentUser = null;
 
 // ── Auth ─────────────────────────────────────────────────────
 async function signIn() {
+  const btn = document.querySelector('.btn-signin');
+  btn.textContent = 'Opening sign-in window...';
+  btn.disabled = true;
   try {
-    await msalInstance.initialize();
-    const resp = await msalInstance.loginPopup({ scopes: SCOPES });
+    const resp = await msalInstance.loginPopup({
+      scopes: SCOPES,
+      redirectUri: REDIRECT_URI,
+      prompt: 'select_account',
+    });
     currentUser = resp.account;
     onSignedIn();
   } catch(e) {
-    showError('Sign-in failed: ' + e.message);
+    btn.innerHTML = `<svg class="ms-icon" viewBox="0 0 21 21" fill="none"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg> Sign in with Microsoft`;
+    btn.disabled = false;
+    if (e.errorCode === 'user_cancelled' || (e.message && e.message.includes('user_cancelled'))) return;
+    showError('Sign-in failed: ' + (e.errorCode || e.message || String(e)));
+    console.error('[SignIn error]', e);
   }
 }
 
@@ -541,20 +559,32 @@ async function getToken() {
   const accounts = msalInstance.getAllAccounts();
   if (!accounts.length) throw new Error('Not signed in');
   try {
-    const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
+    const r = await msalInstance.acquireTokenSilent({
+      scopes: SCOPES,
+      account: accounts[0],
+      redirectUri: REDIRECT_URI,
+    });
     return r.accessToken;
   } catch {
-    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
+    const r = await msalInstance.acquireTokenPopup({
+      scopes: SCOPES,
+      redirectUri: REDIRECT_URI,
+    });
     return r.accessToken;
   }
 }
 
 async function initMsal() {
-  await msalInstance.initialize();
-  const accounts = msalInstance.getAllAccounts();
-  if (accounts.length) {
-    currentUser = accounts[0];
-    onSignedIn();
+  try {
+    await msalInstance.initialize();
+    await msalInstance.handleRedirectPromise();
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length) {
+      currentUser = accounts[0];
+      onSignedIn();
+    }
+  } catch(e) {
+    console.error('[MSAL init error]', e);
   }
 }
 
