@@ -251,38 +251,30 @@ const STATIC_GAPS     = [{"Blocking Criteria": "MAF", "Bids Blocked": 5, "Source
 
 let allPipeline = [], allGaps = [], currentUser = null, isLiveMode = false;
 
-// ── MSAL ──────────────────────────────────────────────────────
+// ── MSAL — redirect flow (works with all tenant policies) ─────
 const msalInstance = new msal.PublicClientApplication({
   auth: {
     clientId: CLIENT_ID,
     authority: `https://login.microsoftonline.com/${TENANT_ID}`,
     redirectUri: REDIRECT_URI,
-    navigateToLoginRequestUrl: false,
+    navigateToLoginRequestUrl: true,
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true },
 });
 
 async function signIn() {
-  const btn = document.getElementById('signin-btn');
-  btn.disabled = true;
-  btn.textContent = 'Opening sign-in...';
   try {
     await msalInstance.initialize();
-    const resp = await msalInstance.loginPopup({
+    // Use redirect instead of popup — works with all tenant policies
+    await msalInstance.loginRedirect({
       scopes: SCOPES,
       redirectUri: REDIRECT_URI,
       prompt: 'select_account',
     });
-    currentUser = resp.account;
-    isLiveMode = true;
-    showDashboard();
-    await loadLiveData();
+    // Page will redirect to Microsoft and back — no code runs after this
   } catch(e) {
-    btn.disabled = false;
-    btn.innerHTML = `<svg class="ms-icon" viewBox="0 0 21 21" fill="none"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/></svg> Sign in with Microsoft`;
-    if (!e.errorCode?.includes('user_cancelled') && !e.message?.includes('user_cancelled')) {
-      showError('Sign-in error: ' + (e.errorCode || e.message));
-    }
+    showError('Sign-in error: ' + (e.errorCode || e.message));
+    console.error('[SignIn]', e);
   }
 }
 
@@ -325,11 +317,20 @@ async function getToken() {
   const accounts = msalInstance.getAllAccounts();
   if (!accounts.length) throw new Error('Not signed in');
   try {
-    const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0], redirectUri: REDIRECT_URI });
+    const r = await msalInstance.acquireTokenSilent({
+      scopes: SCOPES,
+      account: accounts[0],
+      redirectUri: REDIRECT_URI,
+    });
     return r.accessToken;
-  } catch {
-    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES, redirectUri: REDIRECT_URI });
-    return r.accessToken;
+  } catch(e) {
+    // Silent failed — use redirect to get new token
+    await msalInstance.acquireTokenRedirect({
+      scopes: SCOPES,
+      account: accounts[0],
+      redirectUri: REDIRECT_URI,
+    });
+    throw new Error('Redirecting for token...');
   }
 }
 
@@ -583,7 +584,17 @@ function showError(msg) {
 (async function init() {
   try {
     await msalInstance.initialize();
-    await msalInstance.handleRedirectPromise();
+    // Handle the redirect response after coming back from Microsoft
+    const redirectResult = await msalInstance.handleRedirectPromise();
+    if (redirectResult) {
+      // Just came back from Microsoft login — sign in succeeded
+      currentUser = redirectResult.account;
+      isLiveMode = true;
+      showDashboard();
+      await loadLiveData();
+      return;
+    }
+    // Check if already signed in from a previous session
     const accounts = msalInstance.getAllAccounts();
     if (accounts.length) {
       currentUser = accounts[0];
@@ -593,6 +604,7 @@ function showError(msg) {
     }
   } catch(e) {
     console.error('[MSAL init]', e);
+    showError('Auth error: ' + (e.errorCode || e.message));
   }
 })();
 </script>
