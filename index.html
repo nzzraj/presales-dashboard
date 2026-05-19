@@ -689,10 +689,26 @@ const PAGE_SIZE   = 20;
 // ═══════════════════════════════════════════════════════════════════
 // BOOT
 // ═══════════════════════════════════════════════════════════════════
+function waitForMsal(timeout = 8000) {
+  return new Promise((resolve, reject) => {
+    if (typeof msal !== 'undefined') { resolve(); return; }
+    const start = Date.now();
+    const interval = setInterval(() => {
+      if (typeof msal !== 'undefined') { clearInterval(interval); resolve(); }
+      else if (Date.now() - start > timeout) { clearInterval(interval); reject(new Error('MSAL CDN timeout')); }
+    }, 100);
+  });
+}
+
 async function init() {
   updateSnapshot();
-  setStatus('static','Initialising MSAL…');
+  setStatus('static', 'Loading…');
+  const btnRefresh = document.getElementById('btnRefresh');
+  const btnSignIn  = document.getElementById('btnSignIn');
+  if (btnRefresh) btnRefresh.disabled = true;
+  if (btnSignIn)  btnSignIn.disabled  = true;
   try {
+    await waitForMsal();
     msalApp = new msal.PublicClientApplication(MSAL_CONFIG);
     await msalApp.initialize();
     const redirect = await msalApp.handleRedirectPromise();
@@ -704,6 +720,8 @@ async function init() {
       const accts = msalApp.getAllAccounts();
       if (accts.length) currentAcct = accts[0];
     }
+    if (btnRefresh) btnRefresh.disabled = false;
+    if (btnSignIn)  btnSignIn.disabled  = false;
     if (currentAcct) {
       applyUserUI(currentAcct);
       try {
@@ -716,6 +734,8 @@ async function init() {
     showStatic();
   } catch(err) {
     console.error('MSAL init error:', err);
+    if (btnRefresh) btnRefresh.disabled = false;
+    if (btnSignIn)  btnSignIn.disabled  = false;
     showStatic();
   }
 }
@@ -753,7 +773,7 @@ function setStatus(mode, msg) {
 // AUTH
 // ═══════════════════════════════════════════════════════════════════
 async function signIn() {
-  if (!msalApp) { toast('error','MSAL not ready'); return; }
+  if (!msalApp) { toast('error','Still loading — please wait a moment and try again'); return; }
   try { await msalApp.loginRedirect({ scopes: SCOPES }); }
   catch(e) { toast('error','Sign-in error: ' + e.message); }
 }
@@ -772,7 +792,7 @@ async function getToken() {
   }
 }
 async function refreshLive() {
-  if (!msalApp) { toast('info','MSAL not ready'); return; }
+  if (!msalApp) { toast('info','Still loading — please wait a moment and try again'); return; }
   if (!currentAcct) { signIn(); return; }
   const tk = await getToken();
   if (!tk) return;
