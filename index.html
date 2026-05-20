@@ -7,235 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.30.0/dist/msal-browser.min.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="css/styles.css"/>
+<script src="https://unpkg.com/@azure/msal-browser@2.38.0/lib/msal-browser.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0A0A0A;
-  --card:#141414;
-  --card2:#1A1A1A;
-  --border:#2A2A2A;
-  --accent:#E87500;
-  --accent-dim:#b35c00;
-  --text:#FFFFFF;
-  --muted:#999999;
-  --muted2:#666666;
-  --green:#22c55e;
-  --red:#ef4444;
-  --blue:#3b82f6;
-  --yellow:#f59e0b;
-  --radius:10px;
-}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh;overflow-x:hidden}
-h1,h2,h3,h4,.heading{font-family:'Syne',sans-serif}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
-
-/* HEADER */
-#header{
-  background:var(--card);border-bottom:1px solid var(--border);
-  padding:0 24px;display:flex;align-items:center;gap:16px;height:64px;
-  position:sticky;top:0;z-index:100;flex-wrap:wrap;
-}
-.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--accent);letter-spacing:-0.5px;white-space:nowrap}
-.logo-sub{color:var(--text);font-size:11px;font-weight:600;letter-spacing:2.5px;margin-left:10px;opacity:0.55;vertical-align:middle}
-.header-spacer{flex:1}
-.header-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.header-user{font-size:12px;color:var(--muted);white-space:nowrap}
-.header-snapshot{font-size:12px;color:var(--muted2);white-space:nowrap}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;transition:all .15s ease;white-space:nowrap;text-decoration:none}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover:not(:disabled){background:var(--accent-dim)}
-.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover:not(:disabled){background:#222}
-.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
-.btn-ghost:hover:not(:disabled){color:var(--text);border-color:var(--muted2)}
-.btn-danger{background:#3f0000;color:#fca5a5;border:1px solid #7f1d1d}
-.btn-danger:hover:not(:disabled){background:#7f1d1d}
-.btn-sm{padding:5px 11px;font-size:12px}
-.btn-icon{padding:6px;width:30px;height:30px;justify-content:center;border-radius:5px}
-
-/* STATUS BAR */
-#statusBar{background:var(--card);border-bottom:1px solid var(--border);padding:5px 24px;font-size:12px;display:flex;align-items:center;gap:8px}
-.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0}
-.status-dot.static{background:var(--yellow);animation:none}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-
-/* BANNER */
-#staticBanner{background:#1c1400;border-bottom:1px solid #3d2e00;padding:7px 24px;font-size:12px;color:var(--yellow);display:none;align-items:center;gap:8px}
-
-/* SIGN IN PROMPT */
-#signInPrompt{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;display:none;align-items:center;justify-content:space-between;gap:16px;margin:16px 24px 0;flex-wrap:wrap}
-.sip-text{font-size:13px;color:var(--muted)}
-.sip-text strong{color:var(--text)}
-
-/* TABS */
-#tabs{display:flex;padding:0 24px;background:var(--card);border-bottom:1px solid var(--border)}
-.tab{padding:14px 20px;font-size:13px;font-weight:600;font-family:'Syne',sans-serif;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-
-/* CONTENT */
-#content{padding:24px;max-width:1600px;margin:0 auto}
-.tab-panel{display:none}
-.tab-panel.active{display:block}
-
-/* SCORECARDS */
-.scorecards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:24px}
-@media(max-width:1100px){.scorecards{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:580px){.scorecards{grid-template-columns:repeat(2,1fr)}}
-.scorecard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;transition:border-color .15s}
-.scorecard:hover{border-color:var(--muted2)}
-.sc-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px}
-.sc-value{font-family:'Syne',sans-serif;font-size:34px;font-weight:700;line-height:1}
-.sc-sub{font-size:11px;color:var(--muted2);margin-top:5px}
-.sc-white .sc-value{color:var(--text)}
-.sc-orange .sc-value{color:var(--accent)}
-.sc-blue .sc-value{color:var(--blue)}
-.sc-green .sc-value{color:var(--green)}
-.sc-red .sc-value{color:var(--red)}
-.sc-yellow .sc-value{color:var(--yellow)}
-
-/* OVERVIEW GRID */
-.ov-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-@media(max-width:1200px){.ov-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:700px){.ov-grid{grid-template-columns:1fr}}
-
-.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-.panel-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-
-/* TABLES */
-.tbl-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse}
-th{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:10px 12px;border-bottom:1px solid #1c1c1c;vertical-align:middle;font-size:13px}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.018)}
-.td-muted{color:var(--muted);font-size:12px}
-.td-actions{display:flex;align-items:center;gap:4px;white-space:nowrap;justify-content:center}
-
-/* BADGES */
-.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
-.badge-green{background:#14532d;color:#86efac}
-.badge-blue{background:#1e3a5f;color:#93c5fd}
-.badge-orange{background:#431407;color:#fdba74}
-.badge-red{background:#3f0000;color:#fca5a5}
-.badge-yellow{background:#451a03;color:#fde68a}
-.badge-gray{background:#1f2937;color:#9ca3af}
-.prob-high{color:var(--green);font-weight:600}
-.prob-medium{color:var(--yellow);font-weight:600}
-.prob-low{color:var(--red);font-weight:600}
-
-/* REGION */
-.region-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1c1c1c}
-.region-row:last-child{border-bottom:none}
-.region-name{width:140px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
-.region-bar-wrap{flex:1;background:#1d1d1d;border-radius:3px;height:5px;overflow:hidden}
-.region-bar{height:100%;background:var(--accent);border-radius:3px;transition:width .5s ease}
-.region-stats{font-size:11px;color:var(--muted);white-space:nowrap;width:90px;text-align:right}
-
-/* PIPELINE CONTROLS */
-.pipe-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
-.f-input{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color .15s}
-.f-input:focus{border-color:var(--accent)}
-.f-input::placeholder{color:var(--muted2)}
-select.f-input option{background:var(--card2)}
-.search-wrap{position:relative;flex:1;min-width:200px}
-.search-wrap .f-input{width:100%;padding-left:34px}
-.search-ic{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted2);pointer-events:none}
-.pipe-count{font-size:12px;color:var(--muted2);margin-left:auto;white-space:nowrap}
-
-/* PAGINATION */
-.pagination{display:flex;align-items:center;gap:6px;padding:12px 16px;justify-content:flex-end;flex-wrap:wrap}
-.pg-info{font-size:12px;color:var(--muted);margin-right:4px}
-
-/* GAPS */
-.gap-bar-wrap{width:120px;background:#1d1d1d;border-radius:3px;height:5px;overflow:hidden;display:inline-block;vertical-align:middle}
-.gap-bar{height:100%;background:var(--accent);border-radius:3px}
-.gap-row{cursor:pointer}
-.gap-row:hover td{background:rgba(232,117,0,.06)}
-
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s ease}
-.modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:12px;width:90%;max-width:760px;max-height:92vh;display:flex;flex-direction:column;transform:translateY(18px);transition:transform .2s ease}
-.modal-overlay.open .modal{transform:translateY(0)}
-.modal-hdr{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.modal-ttl{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
-.modal-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:4px;line-height:1;transition:color .1s}
-.modal-x:hover{color:var(--text)}
-.modal-body{padding:24px;overflow-y:auto;flex:1}
-.modal-ftr{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;flex-shrink:0}
-
-/* FORM */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:580px){.form-grid{grid-template-columns:1fr}}
-.fg{display:flex;flex-direction:column;gap:6px}
-.fg.full{grid-column:1/-1}
-.flabel{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.3px}
-.flabel .req{color:var(--accent)}
-.finput{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;outline:none;transition:border-color .15s;width:100%}
-.finput:focus{border-color:var(--accent)}
-.finput::placeholder{color:var(--muted2)}
-select.finput option{background:#1A1A1A}
-textarea.finput{resize:vertical;min-height:80px}
-
-/* DOC PANEL */
-.doc-panel{max-width:560px}
-.doc-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;min-height:40px}
-.doc-item{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px}
-.doc-icon{color:var(--accent);font-size:18px;flex-shrink:0}
-.doc-name{font-size:13px;flex:1;word-break:break-all}
-.doc-meta{font-size:11px;color:var(--muted)}
-.doc-dl{color:var(--accent);text-decoration:none;font-size:11px;font-weight:600;white-space:nowrap}
-.doc-dl:hover{text-decoration:underline}
-.drop-zone{border:2px dashed var(--border);border-radius:8px;padding:28px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;transition:all .15s}
-.drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);color:var(--text);background:rgba(232,117,0,.04)}
-.drop-zone input[type=file]{display:none}
-.dz-icon{font-size:26px;margin-bottom:8px;color:var(--muted2)}
-
-/* GAPS DETAIL */
-.gaps-detail{max-width:820px}
-
-/* CONFIRM */
-.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:300;opacity:0;pointer-events:none;transition:opacity .15s}
-.confirm-overlay.open{opacity:1;pointer-events:all}
-.confirm-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:28px 32px;width:90%;max-width:400px;text-align:center}
-.confirm-box h3{font-family:'Syne',sans-serif;margin-bottom:10px}
-.confirm-box p{color:var(--muted);font-size:13px;margin-bottom:24px;line-height:1.6}
-.confirm-btns{display:flex;gap:10px;justify-content:center}
-
-/* TOAST */
-#toastContainer{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:999}
-.toast{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:10px;max-width:340px;animation:slideIn .2s ease;box-shadow:0 4px 24px rgba(0,0,0,.5)}
-.toast.success{border-left:3px solid var(--green)}
-.toast.error{border-left:3px solid var(--red)}
-.toast.info{border-left:3px solid var(--blue)}
-@keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(110%);opacity:0}}
-
-/* SPINNER */
-.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;display:inline-block;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-center{display:flex;align-items:center;justify-content:center;padding:36px;gap:12px;color:var(--muted);font-size:13px}
-
-/* MISC */
-.count-pill{display:inline-flex;align-items:center;justify-content:center;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:1px 8px;font-size:11px;color:var(--muted)}
-.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
-.empty{padding:36px;text-align:center;color:var(--muted2);font-size:13px}
-.rfp-id{font-family:'Syne',sans-serif;font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.3px}
-
-@media(max-width:768px){
-  #header{height:auto;padding:12px 16px;gap:8px}
-  .logo-sub{display:none}
-  #content{padding:14px}
-}
-</style>
 </head>
 <body>
 
@@ -268,7 +42,7 @@ textarea.finput{resize:vertical;min-height:80px}
 <!-- STATIC BANNER -->
 <div id="staticBanner">
   <svg style="width:13px;height:13px;flex-shrink:0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-  Showing static preview — sign in to see live data
+  Sign in with your Saints &amp; Masters account to load RFP data
   <button class="btn btn-sm" style="background:#3d2e00;color:#fde68a;border:1px solid #5c4500;margin-left:auto" onclick="signIn()">Sign In with Microsoft</button>
 </div>
 
@@ -296,13 +70,13 @@ textarea.finput{resize:vertical;min-height:80px}
         <div class="panel-title">Active Bids <span class="count-pill" id="activeBidsCount">0</span></div>
         <div class="tbl-wrap">
           <table>
-            <thead><tr><th>Authority</th><th>Region</th><th>Deadline</th><th>Prob</th><th>Status</th></tr></thead>
+            <thead><tr><th>Authority</th><th>Region</th><th>Deadline</th><th>Division</th><th>Status</th></tr></thead>
             <tbody id="activeBidsTbody"></tbody>
           </table>
         </div>
       </div>
       <div class="panel">
-        <div class="panel-title">No-Go Blockers</div>
+        <div class="panel-title">No-Bid Blockers</div>
         <div style="position:relative">
           <canvas id="blockerChart"></canvas>
         </div>
@@ -326,13 +100,15 @@ textarea.finput{resize:vertical;min-height:80px}
       </select>
       <select class="f-input" id="filterStatus" onchange="applyFilters()">
         <option value="">All Statuses</option>
-        <option>Under Evaluation</option><option>In Progress</option>
+        <option>In Progress</option>
         <option>Submitted</option><option>Won</option>
-        <option>Lost</option><option>No-Go</option><option>On Hold</option>
+        <option>Lost</option><option>No Bid</option><option>On Hold</option>
       </select>
-      <select class="f-input" id="filterProb" onchange="applyFilters()">
-        <option value="">All Probabilities</option>
-        <option>High</option><option>Medium</option><option>Low</option>
+      <select class="f-input" id="filterDivision" onchange="applyFilters()">
+        <option value="">All Divisions</option>
+        <option>CEE Division</option>
+        <option>India Division</option>
+        <option>SEA Division</option>
       </select>
       <span class="pipe-count" id="pipelineCount"></span>
     </div>
@@ -340,8 +116,10 @@ textarea.finput{resize:vertical;min-height:80px}
       <div class="tbl-wrap">
         <table id="pipelineTable">
           <thead><tr>
-            <th>RFP ID</th><th>Issuing Authority</th><th>RFP Title</th><th>Region</th>
-            <th>Deadline</th><th>Status</th><th>Win Prob</th><th style="text-align:center">Actions</th>
+            <th>RFP ID</th><th>Issuing Authority</th><th>RFP Title</th><th>RFP Value</th>
+            <th>Country</th><th>Industry</th><th>Division</th><th>Source Type</th>
+            <th>Deadline</th><th>Sub. Status</th><th>Opp. Status</th><th>Comments</th>
+            <th style="text-align:center">Actions</th>
           </tr></thead>
           <tbody id="pipelineTbody"></tbody>
         </table>
@@ -378,142 +156,128 @@ textarea.finput{resize:vertical;min-height:80px}
     <div class="modal-body">
       <form id="rfpForm" onsubmit="submitRfpForm(event)">
         <div class="form-grid">
+          <!-- 1. RFP ID -->
           <div class="fg">
             <label class="flabel">RFP ID <span class="req">*</span></label>
-            <input class="finput" name="Title" type="text" required placeholder="e.g. 04886/2026"/>
+            <input class="finput" name="RFPId" type="text" required placeholder="e.g. 04886/2026"/>
           </div>
+          <!-- 2. Issuing Authority -->
           <div class="fg">
             <label class="flabel">Issuing Authority</label>
-            <input class="finput" name="IssuingAuthority" type="text" placeholder="Ministry of Finance"/>
+            <input class="finput" name="IssuingAuthority" type="text" placeholder="Municipality of Shtip"/>
           </div>
+          <!-- 3. RFP Title -->
           <div class="fg full">
             <label class="flabel">RFP Title</label>
-            <input class="finput" name="RFPTitle" type="text" placeholder="Supply of Microsoft 365 Licenses"/>
+            <input class="finput" name="RFPTitle" type="text" placeholder="Supply of office software and cloud services"/>
           </div>
+          <!-- 4. RFP Value -->
           <div class="fg">
-            <label class="flabel">RFP Value (USD)</label>
-            <input class="finput" name="RFPValue" type="number" min="0" step="1" placeholder="1000000"/>
+            <label class="flabel">RFP Value</label>
+            <input class="finput" name="RFPValue" type="text" placeholder="e.g. ₹ 3,50,000"/>
           </div>
-          <div class="fg">
-            <label class="flabel">RFP Category</label>
-            <select class="finput" name="RFPCategory">
-              <option value="">— Select —</option>
-              <option>Software Licensing</option><option>Cloud Services</option>
-              <option>IT Infrastructure</option><option>Consulting Services</option>
-              <option>Managed Services</option><option>System Integration</option>
-              <option>Cybersecurity</option><option>Other</option>
-            </select>
-          </div>
+          <!-- 5. Country of Origin -->
           <div class="fg">
             <label class="flabel">Country of Origin</label>
-            <select class="finput" name="CountryOfOrigin">
-              <option value="">— Select —</option>
-              <option>North Macedonia</option><option>India</option><option>Slovenia</option>
-              <option>Croatia</option><option>UK</option><option>Serbia</option>
-              <option>Bosnia &amp; Herzegovina</option><option>Montenegro</option>
-              <option>Albania</option><option>Kosovo</option><option>Other</option>
-            </select>
+            <input class="finput" name="CountryOfOrigin" type="text" placeholder="Macedonia"/>
           </div>
+          <!-- 6. Industry -->
           <div class="fg">
             <label class="flabel">Industry</label>
             <input class="finput" name="Industry" type="text" placeholder="Government / Public Administration"/>
           </div>
+          <!-- 7. Source Division -->
           <div class="fg">
-            <label class="flabel">Source</label>
-            <input class="finput" name="Source" type="text" placeholder="CEE Division"/>
-          </div>
-          <div class="fg">
-            <label class="flabel">Source Type</label>
-            <select class="finput" name="SourceType">
+            <label class="flabel">Source Division</label>
+            <select class="finput" name="SourceDivision">
               <option value="">— Select —</option>
-              <option>Direct - Portal</option><option>Partner Referral</option>
-              <option>Inbound Enquiry</option><option>Account Team</option><option>Other</option>
+              <option>CEE Division</option>
+              <option>India Division</option>
+              <option>SEA Division</option>
             </select>
           </div>
+          <!-- 8. Source Type -->
+          <div class="fg">
+            <label class="flabel">Source Type</label>
+            <input class="finput" name="SourceType" type="text" placeholder="Direct - Portal"/>
+          </div>
+          <!-- 9. Identification Date -->
           <div class="fg">
             <label class="flabel">Identification Date</label>
             <input class="finput" name="IdentificationDate" type="date"/>
           </div>
+          <!-- 10. Assessment Date -->
           <div class="fg">
             <label class="flabel">Assessment Date</label>
             <input class="finput" name="AssessmentDate" type="date"/>
           </div>
-          <div class="fg">
-            <label class="flabel">Last Activity</label>
-            <input class="finput" name="LastActivityTime" type="date"/>
-          </div>
-          <div class="fg">
-            <label class="flabel">Current Stage</label>
-            <select class="finput" name="CurrentStage">
-              <option value="">— Select —</option>
-              <option>Under Evaluation</option><option>In Progress</option>
-              <option>Submitted</option><option>Won</option><option>Lost</option>
-              <option>No-Go</option><option>On Hold</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label class="flabel">Opportunity Status</label>
-            <select class="finput" name="OpportunityStatus">
-              <option value="">— Select —</option>
-              <option>Under Evaluation</option><option>In Progress</option>
-              <option>Submitted</option><option>Won</option><option>Lost</option>
-              <option>No-Go</option>
-            </select>
-          </div>
+          <!-- 11. Submission Status -->
           <div class="fg">
             <label class="flabel">Submission Status</label>
-            <select class="finput" name="SubmissionStatus">
+            <select class="finput" name="SubmissionStatus" onchange="toggleBlockingFields()">
               <option value="">— Select —</option>
-              <option>Pending</option><option>Submitted</option><option>Not Applicable</option>
+              <option>Not Submitted</option>
+              <option>Submitted</option>
+              <option>No Bid</option>
             </select>
           </div>
+          <!-- 12. Submission Deadline -->
           <div class="fg">
             <label class="flabel">Submission Deadline</label>
             <input class="finput" name="SubmissionDeadline" type="date"/>
           </div>
+          <!-- 13. Opportunity Status -->
           <div class="fg">
-            <label class="flabel">Queries to be Addressed</label>
-            <select class="finput" name="QueriesToBeAddressed">
+            <label class="flabel">Opportunity Status</label>
+            <select class="finput" name="OpportunityStatus">
               <option value="">— Select —</option>
-              <option>Y</option><option>N</option>
+              <option>In Progress</option>
+              <option>Submitted</option>
+              <option>Won</option>
+              <option>Lost</option>
+              <option>No Bid</option>
+              <option>On Hold</option>
             </select>
           </div>
+          <!-- 14. Query Submission Deadline -->
           <div class="fg">
             <label class="flabel">Query Submission Deadline</label>
             <input class="finput" name="QuerySubmissionDeadline" type="date"/>
           </div>
+          <!-- 15. Response Received Date -->
           <div class="fg">
             <label class="flabel">Response Received Date</label>
             <input class="finput" name="ResponseReceivedDate" type="date"/>
           </div>
-          <div class="fg">
-            <label class="flabel">Win Probability</label>
-            <select class="finput" name="WinProbability">
-              <option value="">— Select —</option>
-              <option>High</option><option>Medium</option><option>Low</option>
-            </select>
-          </div>
+          <!-- 16. Comments -->
           <div class="fg full">
-            <label class="flabel">Blocking Criteria</label>
-            <select class="finput" name="BlockingCriteria">
+            <label class="flabel">Comments</label>
+            <textarea class="finput" name="Comments" placeholder="Additional context, remarks…"></textarea>
+          </div>
+          <!-- 17. Blocking Category (visible only when SubmissionStatus = No Bid) -->
+          <div class="fg full" id="blockingCategoryGroup" style="display:none">
+            <label class="flabel">Blocking Category</label>
+            <select class="finput" name="BlockingCategory">
               <option value="">— Select —</option>
-              <option>None</option>
+              <option value="None">None</option>
               <option>OEM &amp; Authorization Gaps</option>
               <option>Past Performance &amp; Reference Gaps</option>
               <option>Compliance &amp; Certification Gaps</option>
-              <option>Local Presence &amp; Residency Gaps</option>
+              <option>Local Presence &amp; Data Residency Gaps</option>
               <option>Portal &amp; Administrative Gaps</option>
               <option>Commercial &amp; Technical Capability Gaps</option>
               <option>Supply Chain &amp; Pricing Gaps</option>
             </select>
           </div>
-          <div class="fg full">
+          <!-- 18. Blocking Detail (visible only when SubmissionStatus = No Bid) -->
+          <div class="fg full" id="blockingDetailGroup" style="display:none">
             <label class="flabel">Specific Blocking Detail</label>
-            <input class="finput" type="text" name="SpecificBlockingDetail" placeholder="e.g. Missing MAF letter, No Sophos partner status…">
+            <textarea class="finput" name="BlockingDetail" placeholder="e.g. Missing MAF letter, No Sophos partner status…"></textarea>
           </div>
+          <!-- 19. Document Path -->
           <div class="fg full">
-            <label class="flabel">Comments</label>
-            <textarea class="finput" name="Comments" placeholder="Additional context, remarks…"></textarea>
+            <label class="flabel">Document Path</label>
+            <input class="finput" name="DocumentPath" type="text" placeholder="RFP Documents/Country/RFP-ID/"/>
           </div>
         </div>
       </form>
@@ -545,7 +309,7 @@ textarea.finput{resize:vertical;min-height:80px}
         <input type="file" id="fileInput" multiple onchange="handleFileSelect(event)"/>
         <div class="dz-icon">&#128206;</div>
         <div><strong>Click to upload</strong> or drag &amp; drop files here</div>
-        <div style="font-size:11px;color:var(--muted2);margin-top:5px">Uploaded to OneDrive: RFP Documents / {Region} / {RFP-ID}</div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:5px">Uploaded to OneDrive: RFP Documents / {Country} / {RFP-ID}</div>
       </div>
       <div id="uploadProgress" style="display:none;margin-top:12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px"></div>
     </div>
@@ -591,808 +355,12 @@ textarea.finput{resize:vertical;min-height:80px}
 <!-- TOAST CONTAINER -->
 <div id="toastContainer"></div>
 
-<script>
-// ═══════════════════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════════════════
-const MSAL_CONFIG = {
-  auth: {
-    clientId: '985c0a27-6dfb-4db4-a5f2-89063e62786d',
-    authority: 'https://login.microsoftonline.com/da51236c-673f-4088-b303-6ed33f5d7cbb',
-    redirectUri: 'https://presales-dashboard-rho.vercel.app'
-  },
-  cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true }
-};
-const SCOPES = ['Sites.ReadWrite.All', 'Files.ReadWrite', 'User.Read'];
+<!-- SCRIPTS (load order matters) -->
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/sharepoint.js"></script>
+<script src="js/dashboard.js"></script>
 
-const SP_SITE_ID  = '8d80a518-b3c8-45d3-80e6-d077a3e8e0bd';
-const SP_LIST_ID  = '2951b765-1c2f-48f1-83ce-54d53ca3ebb3';
-const SP_GAPS_ID  = '563a0568-9439-457e-89e1-3979a7d5dea6';
-const SP_HOST     = 'saintsandmastersglobal.sharepoint.com';
-
-const GRAPH = 'https://graph.microsoft.com/v1.0';
-
-// ═══════════════════════════════════════════════════════════════════
-// STATIC FALLBACK DATA (53 records)
-// ═══════════════════════════════════════════════════════════════════
-const STATIC_PIPELINE = [
-  {id:'RFP-001',title:'Supply of Microsoft 365 Licenses',authority:'Ministry of Finance',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-01-15',deadline:'2026-03-15',value:850000,status:'Lost',winProb:'High',stage:'Submitted',submissionStatus:'Submitted',blocking:'OEM & Authorization Gaps',remarks:'Lost due to MAF requirement'},
-  {id:'RFP-002',title:'ICT Infrastructure Upgrade',authority:'Public Revenue Office',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-01-20',deadline:'2026-03-20',value:1200000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'Past Performance & Reference Gaps',remarks:'Required 3 similar references'},
-  {id:'RFP-003',title:'Cloud Services Procurement',authority:'Agency for Electronic Communications',region:'North Macedonia',industry:'Telecommunications',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-01-25',deadline:'2026-04-01',value:650000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:'No OEM authorization available'},
-  {id:'RFP-004',title:'Software Licensing Framework',authority:'Ministry of Interior',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-02-01',deadline:'2026-04-10',value:950000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:'Requires authorized distributor'},
-  {id:'RFP-005',title:'Digital Transformation Services',authority:'National Bank',region:'North Macedonia',industry:'Banking & Finance',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-02-05',deadline:'2026-04-15',value:2100000,status:'In Progress',winProb:'High',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:'Strong position'},
-  {id:'RFP-006',title:'IT Security Solutions',authority:'Ministry of Defense',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-02-10',deadline:'2026-04-18',value:750000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:'Competitive bid'},
-  {id:'RFP-007',title:'ERP System Implementation',authority:'Customs Administration',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-02-12',deadline:'2026-04-20',value:3200000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'Past Performance & Reference Gaps',remarks:'Lost on experience criteria'},
-  {id:'RFP-008',title:'Network Infrastructure',authority:'State Statistical Office',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-02-15',deadline:'2026-05-01',value:480000,status:'In Progress',winProb:'High',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-009',title:'Cybersecurity Assessment',authority:'Financial Intelligence Unit',region:'North Macedonia',industry:'Banking & Finance',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-02-18',deadline:'2026-05-05',value:320000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Compliance & Certification Gaps',remarks:'Requires CISSP certified staff'},
-  {id:'RFP-010',title:'Data Center Consolidation',authority:'Agency for Real Estate Cadastre',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-02-20',deadline:'2026-05-10',value:1800000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'OEM & Authorization Gaps',remarks:'MAF not available'},
-  {id:'RFP-011',title:'Microsoft 365 Education Licenses',authority:'Ministry of Education',region:'North Macedonia',industry:'Education',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-02-22',deadline:'2026-05-12',value:920000,status:'In Progress',winProb:'High',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:'Good fit'},
-  {id:'RFP-012',title:'Public Portal Development',authority:'Government of North Macedonia',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-02-25',deadline:'2026-05-15',value:1500000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-013',title:'Healthcare IT System',authority:'Ministry of Health',region:'North Macedonia',industry:'Healthcare',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-01',deadline:'2026-05-18',value:2800000,status:'In Progress',winProb:'High',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:'Priority bid'},
-  {id:'RFP-014',title:'Supply of Server Hardware',authority:'Municipality of Skopje',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-05',deadline:'2026-05-19',value:680000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:'Spec locked to competitor'},
-  {id:'RFP-015',title:'Office Software Procurement',authority:'Media Information Agency',region:'North Macedonia',industry:'Media',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-08',deadline:'2026-05-18',value:350000,status:'In Progress',winProb:'High',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-016',title:'Pension System Upgrade',authority:'Pension and Disability Insurance',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-10',deadline:'2026-05-18',value:4200000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:'Large opportunity'},
-  {id:'RFP-017',title:'Foreign Investment IT Platform',authority:'Agency for Foreign Investments',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-12',deadline:'2026-05-19',value:890000,status:'In Progress',winProb:'High',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-018',title:'Border Management System',authority:'Customs and Border Protection',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-15',deadline:'2026-05-22',value:3600000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-019',title:'GEM Software Procurement',authority:'Central Government',region:'India',industry:'Government / Public Administration',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-01-10',deadline:'2026-02-28',value:250000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'Portal & Administrative Gaps',remarks:'GeM seller registration issue'},
-  {id:'RFP-020',title:'Cloud Infrastructure GEM',authority:'Ministry of Railways',region:'India',industry:'Government / Public Administration',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-01-15',deadline:'2026-03-05',value:1800000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Portal & Administrative Gaps',remarks:'OEM authorization pending'},
-  {id:'RFP-021',title:'Microsoft Azure GEM Bid',authority:'Defence Research Agency',region:'India',industry:'Government / Public Administration',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-01-20',deadline:'2026-03-10',value:3200000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:'CSP tier not eligible'},
-  {id:'RFP-022',title:'Data Center Services',authority:'National Informatics Centre',region:'India',industry:'Technology',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-01-25',deadline:'2026-03-15',value:8500000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Local Presence & Residency Gaps',remarks:'Requires local data center'},
-  {id:'RFP-023',title:'Software Licenses GEM',authority:'Ministry of Finance India',region:'India',industry:'Government / Public Administration',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-02-01',deadline:'2026-03-20',value:420000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'OEM & Authorization Gaps',remarks:'MAF not provided'},
-  {id:'RFP-024',title:'IT Consulting Services',authority:'NITI Aayog',region:'India',industry:'Government / Public Administration',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-02-05',deadline:'2026-03-25',value:1200000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Past Performance & Reference Gaps',remarks:'Requires India-specific references'},
-  {id:'RFP-025',title:'ERP Implementation GEM',authority:'IREL (India) Limited',region:'India',industry:'Mining & Resources',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-02-10',deadline:'2026-05-13',value:5600000,status:'Submitted',winProb:'High',stage:'Submitted',submissionStatus:'Submitted',blocking:'None',remarks:'Submitted on time'},
-  {id:'RFP-026',title:'Cybersecurity GEM',authority:'CERT-In',region:'India',industry:'Technology',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-02-15',deadline:'2026-04-01',value:2100000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'Compliance & Certification Gaps',remarks:'Required CISSP and CISA'},
-  {id:'RFP-027',title:'Digital Services Platform',authority:'Ministry of Electronics',region:'India',industry:'Government / Public Administration',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-02-20',deadline:'2026-04-10',value:12000000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Local Presence & Residency Gaps',remarks:'Sovereign cloud required'},
-  {id:'RFP-028',title:'Network Upgrade GEM',authority:'Telecom Regulatory Authority',region:'India',industry:'Telecommunications',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-02-25',deadline:'2026-04-15',value:3400000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:'Requires authorized distributor'},
-  {id:'RFP-029',title:'HR Management System',authority:'Ministry of Labour India',region:'India',industry:'Government / Public Administration',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-03-01',deadline:'2026-04-20',value:2200000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Past Performance & Reference Gaps',remarks:''},
-  {id:'RFP-030',title:'Server and Storage GEM',authority:'Indian Space Research Organisation',region:'India',industry:'Technology',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-03-05',deadline:'2026-05-01',value:6800000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'OEM & Authorization Gaps',remarks:'Spec locked to specific vendor'},
-  {id:'RFP-031',title:'Office 365 Procurement',authority:'Ministry of Foreign Affairs Slovenia',region:'Slovenia',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-01-15',deadline:'2026-03-01',value:380000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'OEM & Authorization Gaps',remarks:''},
-  {id:'RFP-032',title:'Public Sector Cloud',authority:'Slovenian Government IT Office',region:'Slovenia',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-01-20',deadline:'2026-03-10',value:1900000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:'No local partner'},
-  {id:'RFP-033',title:'Healthcare Digitization',authority:'Ministry of Health Slovenia',region:'Slovenia',industry:'Healthcare',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-01-25',deadline:'2026-03-15',value:2800000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Past Performance & Reference Gaps',remarks:'Requires EU healthcare references'},
-  {id:'RFP-034',title:'Municipal IT Services',authority:'City of Ljubljana',region:'Slovenia',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-02-01',deadline:'2026-03-20',value:720000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'Past Performance & Reference Gaps',remarks:''},
-  {id:'RFP-035',title:'Education Cloud Platform',authority:'Ministry of Education Slovenia',region:'Slovenia',industry:'Education',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-02-05',deadline:'2026-03-25',value:1100000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:'Spec requires specific vendor'},
-  {id:'RFP-036',title:'Digital Identity System',authority:'Ministry of Interior Slovenia',region:'Slovenia',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-02-10',deadline:'2026-04-01',value:3200000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:''},
-  {id:'RFP-037',title:'Financial System Upgrade',authority:'Bank of Slovenia',region:'Slovenia',industry:'Banking & Finance',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-02-15',deadline:'2026-04-10',value:4500000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'Past Performance & Reference Gaps',remarks:'Lost on references'},
-  {id:'RFP-038',title:'IT Support Services Slovenia',authority:'Slovenian Police',region:'Slovenia',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-02-20',deadline:'2026-05-19',value:890000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-039',title:'MS 365 Migration',authority:'Securities Commission Skopje',region:'North Macedonia',industry:'Banking & Finance',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-15',deadline:'2026-05-07',value:420000,status:'Submitted',winProb:'High',stage:'Submitted',submissionStatus:'Submitted',blocking:'None',remarks:'Awaiting decision'},
-  {id:'RFP-040',title:'Azure Cloud Migration',authority:'State Commission for Prevention of Corruption',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-18',deadline:'2026-05-18',value:1800000,status:'In Progress',winProb:'High',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-041',title:'Data Analytics Platform',authority:'Ministry of Transport',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-20',deadline:'2026-05-25',value:2100000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-042',title:'Digital Courts System',authority:'Ministry of Justice',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-22',deadline:'2026-05-28',value:3400000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-043',title:'Smart City Platform',authority:'City of Skopje',region:'North Macedonia',industry:'Government / Public Administration',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-25',deadline:'2026-06-01',value:5600000,status:'In Progress',winProb:'High',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:'Major opportunity'},
-  {id:'RFP-044',title:'UK Public Sector Cloud',authority:'Department for Science and Technology',region:'UK',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-01-10',deadline:'2026-03-01',value:8900000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Past Performance & Reference Gaps',remarks:'Requires UK-specific past performance'},
-  {id:'RFP-045',title:'NHS Digital Services',authority:'NHS England',region:'UK',industry:'Healthcare',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-01-15',deadline:'2026-03-10',value:12000000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:'Requires UK Crown Commercial Service'},
-  {id:'RFP-046',title:'Ministry of Defence IT',authority:'UK Ministry of Defence',region:'UK',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-01-20',deadline:'2026-03-15',value:25000000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Supply Chain & Pricing Gaps',remarks:'Price point not competitive'},
-  {id:'RFP-047',title:'Local Council Software',authority:'London Borough Council',region:'UK',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-01-25',deadline:'2026-03-20',value:1800000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Commercial & Technical Capability Gaps',remarks:'Requires UK G-Cloud listing'},
-  {id:'RFP-048',title:'Croatia Government Cloud',authority:'Ministry of Finance Croatia',region:'Croatia',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-02-01',deadline:'2026-04-01',value:2200000,status:'Lost',winProb:'Medium',stage:'Submitted',submissionStatus:'Submitted',blocking:'OEM & Authorization Gaps',remarks:''},
-  {id:'RFP-049',title:'Croatian Health IT',authority:'Croatian Institute of Health Insurance',region:'Croatia',industry:'Healthcare',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-02-05',deadline:'2026-04-10',value:3800000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'Past Performance & Reference Gaps',remarks:''},
-  {id:'RFP-050',title:'Croatian Education Platform',authority:'Ministry of Education Croatia',region:'Croatia',industry:'Education',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-02-10',deadline:'2026-04-15',value:1400000,status:'No-Go',winProb:'Low',stage:'Under Evaluation',submissionStatus:'Pending',blocking:'OEM & Authorization Gaps',remarks:''},
-  {id:'RFP-051',title:'Zagreb Smart City',authority:'City of Zagreb',region:'Croatia',industry:'Government / Public Administration',source:'Partner Network',sourceType:'Partner Referral',identDate:'2026-02-15',deadline:'2026-05-19',value:4200000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-052',title:'GEM Security Audit',authority:'Ministry of Home Affairs India',region:'India',industry:'Government / Public Administration',source:'GeM Portal',sourceType:'Direct - Portal',identDate:'2026-03-10',deadline:'2026-05-20',value:1800000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:''},
-  {id:'RFP-053',title:'Macedonia Broadband Infrastructure',authority:'Agency for Electronic Communications',region:'North Macedonia',industry:'Telecommunications',source:'CEE Division',sourceType:'Direct - Portal',identDate:'2026-03-28',deadline:'2026-06-05',value:7800000,status:'In Progress',winProb:'Medium',stage:'In Progress',submissionStatus:'Pending',blocking:'None',remarks:'Long-term contract opportunity'}
-];
-
-// ═══════════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════════
-let msalApp       = null;
-let accessToken   = null;
-let currentAcct   = null;
-let liveData      = null;
-let isLive        = false;
-let blockerChart  = null;
-let editingSpId   = null;   // SharePoint numeric item id for PATCH
-let currentDocRfp = null;   // { id, title, region }
-let filteredRows  = [];
-let pipePage      = 1;
-const PAGE_SIZE   = 20;
-
-// ═══════════════════════════════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════════════════════════════
-async function init() {
-  updateSnapshot();
-  showStatic(); // always show static immediately
-
-  // Step 1: create + initialise MSAL (CDN script is sync in <head>)
-  try {
-    msalApp = new msal.PublicClientApplication(MSAL_CONFIG);
-    await msalApp.initialize();
-  } catch(e) {
-    console.error('[MSAL] init failed:', e);
-    return; // static data already showing
-  }
-
-  // Step 2: consume any redirect response
-  let redirect = null;
-  try {
-    redirect = await msalApp.handleRedirectPromise();
-  } catch(e) {
-    console.warn('[MSAL] handleRedirectPromise error (clearing cache):', e);
-    // stale redirect state — clear it and continue
-    localStorage.clear();
-    return;
-  }
-
-  if (redirect?.accessToken) {
-    accessToken  = redirect.accessToken;
-    currentAcct  = redirect.account;
-    applyUserUI(currentAcct);
-    await loadLiveData();
-    return;
-  }
-
-  // Step 3: check for cached account
-  const accts = msalApp.getAllAccounts();
-  if (accts.length > 0) {
-    currentAcct = accts[0];
-    applyUserUI(currentAcct);
-    try {
-      const tr = await msalApp.acquireTokenSilent({ scopes: SCOPES, account: currentAcct });
-      accessToken = tr.accessToken;
-      await loadLiveData();
-    } catch(e) {
-      console.warn('[MSAL] silent token failed:', e.message);
-      showStatic();
-    }
-  }
-  // else: no session, static data already showing
-}
-
-function showStatic() {
-  isLive = false; liveData = null;
-  document.getElementById('staticBanner').style.display = 'flex';
-  document.getElementById('signInPrompt').style.display = 'flex';
-  document.getElementById('btnSignIn').style.display = '';
-  document.getElementById('btnSignOut').style.display = 'none';
-  setStatus('static','Static preview (not signed in)');
-  renderAll(STATIC_PIPELINE);
-}
-
-function applyUserUI(acct) {
-  const email = acct.username || acct.name || '';
-  document.getElementById('headerUser').textContent = email;
-  document.getElementById('btnSignIn').style.display = 'none';
-  document.getElementById('btnSignOut').style.display = '';
-  document.getElementById('signInPrompt').style.display = 'none';
-  document.getElementById('staticBanner').style.display = 'none';
-}
-
-function updateSnapshot() {
-  const d = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-  document.getElementById('headerSnapshot').textContent = `Snapshot: ${d}`;
-}
-
-function setStatus(mode, msg) {
-  document.getElementById('statusDot').className = 'status-dot' + (mode==='live' ? '' : ' static');
-  document.getElementById('statusText').textContent = msg;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════════════════════════════════
-async function signIn() {
-  if (!msalApp) {
-    toast('error', 'Auth not ready — please refresh the page (F5).');
-    return;
-  }
-  try {
-    await msalApp.loginRedirect({ scopes: SCOPES });
-  } catch(e) {
-    console.error('[MSAL] loginRedirect failed:', e);
-    toast('error', 'Sign-in error: ' + e.message);
-  }
-}
-
-function signOut() {
-  if (msalApp && currentAcct) {
-    msalApp.logoutRedirect({ account: currentAcct });
-  }
-}
-
-async function getToken() {
-  if (!msalApp || !currentAcct) return null;
-  try {
-    const r = await msalApp.acquireTokenSilent({ scopes: SCOPES, account: currentAcct });
-    return r.accessToken;
-  } catch(e) {
-    console.warn('[MSAL] silent token failed, trying redirect:', e.message);
-    try { await msalApp.acquireTokenRedirect({ scopes: SCOPES, account: currentAcct }); }
-    catch(e2) { console.error('[MSAL] acquireTokenRedirect failed:', e2); }
-    return null;
-  }
-}
-
-async function refreshLive() {
-  if (!msalApp) { toast('error', 'Auth not ready — please refresh the page (F5).'); return; }
-  if (!currentAcct) { signIn(); return; }
-  const tk = await getToken();
-  if (!tk) return;
-  accessToken = tk;
-  await loadLiveData();
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// SHAREPOINT READ
-// ═══════════════════════════════════════════════════════════════════
-async function loadLiveData() {
-  setStatus('live','Loading from SharePoint…');
-  if (SP_SITE_ID === 'PASTE_SITE_ID_HERE' || SP_LIST_ID === 'PASTE_LIST_ID_HERE') {
-    toast('info','SP_SITE_ID / SP_LIST_ID not yet configured — showing static data');
-    showStatic(); return;
-  }
-  try {
-    const url = `${GRAPH}/sites/${SP_SITE_ID}/lists/${SP_LIST_ID}/items?expand=fields&$top=500`;
-    const resp = await gGet(url);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status} ${resp.statusText}`);
-    const json = await resp.json();
-    liveData = (json.value || []).map(spToRecord);
-    isLive = true;
-    applyUserUI(currentAcct);
-    const t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    setStatus('live',`Live data — last refreshed ${t}`);
-    renderAll(liveData);
-    toast('success',`Loaded ${liveData.length} RFPs from SharePoint`);
-  } catch(err) {
-    console.error(err);
-    toast('error','SharePoint load failed: ' + err.message);
-    showStatic();
-  }
-}
-
-function spToRecord(item) {
-  const f = item.fields || {};
-  return {
-    _spId: item.id,
-    id:               f.Title               || '',
-    title:            f.RFPTitle             || '',
-    authority:        f.IssuingAuthority     || '',
-    region:           f.CountryOfOrigin      || '',
-    industry:         f.Industry             || '',
-    source:           f.Source               || '',
-    sourceType:       f.SourceType           || '',
-    rfpCategory:      f.RFPCategory          || '',
-    identDate:        isoDate(f.IdentificationDate),
-    assessmentDate:   isoDate(f.AssessmentDate),
-    lastActivity:     isoDate(f.LastActivityTime),
-    deadline:         isoDate(f.SubmissionDeadline),
-    value:            f.RFPValue             || 0,
-    status:           f.OpportunityStatus    || '',
-    winProb:          f.WinProbability       || '',
-    stage:            f.CurrentStage         || '',
-    submissionStatus: f.SubmissionStatus     || '',
-    blocking:         f.BlockingCriteria     || '',
-    remarks:          f.Comments             || '',
-    queries:          f.QueriesToBeAddressed || '',
-    queryDeadline:    isoDate(f.QuerySubmissionDeadline),
-    responseDate:     isoDate(f.ResponseReceivedDate),
-  };
-}
-function isoDate(s) { return s ? s.split('T')[0] : ''; }
-
-// ═══════════════════════════════════════════════════════════════════
-// GRAPH HELPERS
-// ═══════════════════════════════════════════════════════════════════
-const authHdr = () => ({ Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' });
-async function gGet(url)          { return fetch(url, { headers: authHdr() }); }
-async function gPost(url, body)   { return fetch(url, { method:'POST',  headers: authHdr(), body: JSON.stringify(body) }); }
-async function gPatch(url, body)  { return fetch(url, { method:'PATCH', headers: authHdr(), body: JSON.stringify(body) }); }
-async function gDelete(url)       { return fetch(url, { method:'DELETE',headers: authHdr() }); }
-async function gPut(url, blob)    {
-  return fetch(url, {
-    method: 'PUT',
-    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': blob.type || 'application/octet-stream' },
-    body: blob
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// RENDER ALL
-// ═══════════════════════════════════════════════════════════════════
-function renderAll(data) {
-  renderScorecards(data);
-  renderActiveBids(data);
-  renderBlockerChart(data);
-  renderRegions(data);
-  populateRegionFilter(data);
-  filteredRows = [...data];
-  pipePage = 1;
-  renderPipelineTable();
-  renderGaps(data);
-}
-function getData() { return isLive && liveData ? liveData : STATIC_PIPELINE; }
-
-// ═══════════════════════════════════════════════════════════════════
-// SCORECARDS
-// ═══════════════════════════════════════════════════════════════════
-function renderScorecards(data) {
-  const n  = data.length;
-  const ev = data.filter(r=>r.status==='Under Evaluation').length;
-  const ip = data.filter(r=>r.status==='In Progress').length;
-  const sb = data.filter(r=>r.status==='Submitted'||r.submissionStatus==='Submitted').length;
-  const wn = data.filter(r=>r.status==='Won').length;
-  const ng = data.filter(r=>r.status==='No-Go'||r.status==='Lost').length;
-  const cards=[
-    {l:'Total RFPs',       v:n,  s:'All tracked',          c:'sc-white'},
-    {l:'Under Evaluation', v:ev, s:'Assessing fit',        c:'sc-yellow'},
-    {l:'In Progress',      v:ip, s:'Active bids',          c:'sc-blue'},
-    {l:'Submitted',        v:sb, s:'Awaiting decision',    c:'sc-orange'},
-    {l:'Won',              v:wn, s:'Closed won',           c:'sc-green'},
-    {l:'No-Go / Lost',     v:ng, s:'Declined / closed lost',c:'sc-red'},
-  ];
-  document.getElementById('scorecards').innerHTML = cards.map(c=>`
-    <div class="scorecard ${c.c}">
-      <div class="sc-label">${c.l}</div>
-      <div class="sc-value">${c.v}</div>
-      <div class="sc-sub">${c.s}</div>
-    </div>`).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ACTIVE BIDS
-// ═══════════════════════════════════════════════════════════════════
-function renderActiveBids(data) {
-  const active = data
-    .filter(r=>r.status==='In Progress'||r.status==='Submitted')
-    .sort((a,b)=>(a.deadline||'9').localeCompare(b.deadline||'9'));
-  document.getElementById('activeBidsCount').textContent = active.length;
-  const tb = document.getElementById('activeBidsTbody');
-  if (!active.length) { tb.innerHTML='<tr><td colspan="5" class="empty">No active bids</td></tr>'; return; }
-  tb.innerHTML = active.slice(0,14).map(r=>`
-    <tr>
-      <td class="trunc" title="${X(r.authority)}">${X(r.authority)}</td>
-      <td class="td-muted">${X(r.region)}</td>
-      <td class="td-muted" style="white-space:nowrap">${fmtDate(r.deadline)}</td>
-      <td class="${probCls(r.winProb)}">${X(r.winProb)||'—'}</td>
-      <td>${statusBadge(r.status)}</td>
-    </tr>`).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// BLOCKER CHART
-// ═══════════════════════════════════════════════════════════════════
-function renderBlockerChart(data) {
-  const counts = {};
-  data.forEach(r=>{ const b=r.blocking; if(b&&b!=='None'&&b!=='') counts[b]=(counts[b]||0)+1; });
-  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const canvas = document.getElementById('blockerChart');
-  if (blockerChart) { blockerChart.destroy(); blockerChart=null; }
-  if (!sorted.length) { canvas.style.display='none'; return; }
-  canvas.style.display='';
-  const labels = sorted.map(e=>e[0]);
-  const values = sorted.map(e=>e[1]);
-  const h = Math.max(140, sorted.length * 30);
-  canvas.style.height = h+'px';
-  blockerChart = new Chart(canvas, {
-    type:'bar',
-    data:{
-      labels: labels.map(l=>l.length>24?l.slice(0,24)+'…':l),
-      datasets:[{
-        data:values,
-        backgroundColor:'rgba(232,117,0,0.65)',
-        borderColor:'#E87500',
-        borderWidth:1,
-        borderRadius:3,
-      }]
-    },
-    options:{
-      indexAxis:'y',
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{
-          callbacks:{
-            title:items=>labels[items[0].dataIndex],
-            label:item=>` ${item.raw} bid${item.raw!==1?'s':''} blocked`
-          },
-          backgroundColor:'#1A1A1A',borderColor:'#333',borderWidth:1,
-          titleColor:'#fff',bodyColor:'#999',
-        }
-      },
-      scales:{
-        x:{grid:{color:'#1c1c1c'},ticks:{color:'#666',font:{size:11}},beginAtZero:true},
-        y:{grid:{display:false},ticks:{color:'#999',font:{size:11}}}
-      }
-    }
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// REGIONS
-// ═══════════════════════════════════════════════════════════════════
-function renderRegions(data) {
-  const map = {};
-  data.forEach(r=>{
-    const k = r.region||'Unknown';
-    if(!map[k]) map[k]={total:0,active:0,nogo:0};
-    map[k].total++;
-    if(r.status==='In Progress'||r.status==='Submitted') map[k].active++;
-    if(r.status==='No-Go'||r.status==='Lost') map[k].nogo++;
-  });
-  const sorted = Object.entries(map).sort((a,b)=>b[1].total-a[1].total);
-  const max = sorted.length ? sorted[0][1].total : 1;
-  document.getElementById('regionBreakdown').innerHTML = sorted.map(([reg,s])=>`
-    <div class="region-row">
-      <div class="region-name" title="${X(reg)}">${X(reg)}</div>
-      <div class="region-bar-wrap"><div class="region-bar" style="width:${Math.round(s.total/max*100)}%"></div></div>
-      <div class="region-stats">${s.total} total · ${Math.round(s.nogo/s.total*100)}% no-go</div>
-    </div>`).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// PIPELINE TABLE
-// ═══════════════════════════════════════════════════════════════════
-function populateRegionFilter(data) {
-  const regions = [...new Set(data.map(r=>r.region).filter(Boolean))].sort();
-  const sel = document.getElementById('filterCountry');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">All Regions</option>' +
-    regions.map(r=>`<option${r===cur?' selected':''}>${X(r)}</option>`).join('');
-}
-
-function applyFilters() {
-  const q    = document.getElementById('searchInput').value.toLowerCase();
-  const ctry = document.getElementById('filterCountry').value;
-  const stat = document.getElementById('filterStatus').value;
-  const prob = document.getElementById('filterProb').value;
-  const data = getData();
-  filteredRows = data.filter(r=>{
-    if(ctry && r.region!==ctry) return false;
-    if(stat && r.status!==stat) return false;
-    if(prob && r.winProb!==prob) return false;
-    if(q){const h=((r.id||'')+' '+(r.authority||'')+' '+(r.title||'')).toLowerCase(); if(!h.includes(q)) return false;}
-    return true;
-  });
-  pipePage = 1;
-  renderPipelineTable();
-}
-
-function renderPipelineTable() {
-  const start = (pipePage-1)*PAGE_SIZE;
-  const slice = filteredRows.slice(start, start+PAGE_SIZE);
-  const total = Math.ceil(filteredRows.length/PAGE_SIZE);
-  document.getElementById('pipelineCount').textContent =
-    `${filteredRows.length} record${filteredRows.length!==1?'s':''}`;
-  const tb = document.getElementById('pipelineTbody');
-  if(!slice.length){
-    tb.innerHTML='<tr><td colspan="8" class="empty">No records match your filters</td></tr>';
-  } else {
-    tb.innerHTML = slice.map(r=>`
-      <tr>
-        <td><span class="rfp-id">${X(r.id)}</span></td>
-        <td class="trunc" title="${X(r.authority)}">${X(r.authority)}</td>
-        <td class="trunc" title="${X(r.title)}">${X(r.title)}</td>
-        <td class="td-muted" style="white-space:nowrap">${X(r.region)}</td>
-        <td class="td-muted" style="white-space:nowrap">${fmtDate(r.deadline)}</td>
-        <td>${statusBadge(r.status)}</td>
-        <td class="${probCls(r.winProb)}">${X(r.winProb)||'—'}</td>
-        <td><div class="td-actions">
-          <button class="btn btn-secondary btn-icon btn-sm" title="Edit" onclick="openEditModal('${X(r.id)}')">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-          </button>
-          <button class="btn btn-secondary btn-icon btn-sm" title="Documents" onclick="openDocModal('${X(r.id)}','${X(r.title)}','${X(r.region)}')">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
-          </button>
-          <button class="btn btn-danger btn-icon btn-sm" title="Delete" onclick="confirmDelete('${X(r.id)}')">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-          </button>
-        </div></td>
-      </tr>`).join('');
-  }
-  // Pagination
-  const pag = document.getElementById('paginationWrap');
-  if(total<=1){pag.innerHTML='';return;}
-  let html=`<span class="pg-info">Page ${pipePage} of ${total}</span>`;
-  html+=`<button class="btn btn-ghost btn-sm" ${pipePage===1?'disabled':''} onclick="goPage(${pipePage-1})">‹</button>`;
-  const s=Math.max(1,pipePage-2), e=Math.min(total,s+4);
-  for(let p=s;p<=e;p++)
-    html+=`<button class="btn btn-sm ${p===pipePage?'btn-primary':'btn-ghost'}" onclick="goPage(${p})">${p}</button>`;
-  html+=`<button class="btn btn-ghost btn-sm" ${pipePage===total?'disabled':''} onclick="goPage(${pipePage+1})">›</button>`;
-  pag.innerHTML=html;
-}
-function goPage(p){pipePage=p;renderPipelineTable();}
-
-// ═══════════════════════════════════════════════════════════════════
-// GAPS TABLE
-// ═══════════════════════════════════════════════════════════════════
-function renderGaps(data) {
-  const counts={};
-  data.forEach(r=>{const b=r.blocking;if(b&&b!=='None'&&b!=='')counts[b]=(counts[b]||0)+1;});
-  const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const max=sorted.length?sorted[0][1]:1;
-  const tb=document.getElementById('gapsTbody');
-  if(!sorted.length){tb.innerHTML='<tr><td colspan="3" class="empty">No blocking criteria recorded</td></tr>';return;}
-  tb.innerHTML=sorted.map(([crit,cnt])=>`
-    <tr class="gap-row" onclick="openGapsDetail('${X(crit)}')">
-      <td><strong>${X(crit)}</strong></td>
-      <td><span style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--accent)">${cnt}</span>
-          <span class="td-muted" style="margin-left:5px">bid${cnt!==1?'s':''}</span></td>
-      <td>
-        <div class="gap-bar-wrap"><div class="gap-bar" style="width:${Math.round(cnt/max*100)}%"></div></div>
-        <span class="td-muted" style="margin-left:8px;font-size:11px">${Math.round(cnt/max*100)}%</span>
-      </td>
-    </tr>`).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// ADD / EDIT MODAL
-// ═══════════════════════════════════════════════════════════════════
-function openAddModal(){
-  editingSpId=null;
-  document.getElementById('rfpModalTitle').textContent='Add New RFP';
-  document.getElementById('rfpForm').reset();
-  document.getElementById('rfpModalOverlay').classList.add('open');
-}
-
-function openEditModal(rfpId){
-  const rec=getData().find(r=>r.id===rfpId);
-  if(!rec){toast('error','Record not found');return;}
-  editingSpId=rec._spId||null;
-  document.getElementById('rfpModalTitle').textContent=`Edit — ${rfpId}`;
-  const form=document.getElementById('rfpForm');
-  form.reset();
-  const set=(n,v)=>{const el=form.elements[n];if(el&&v!=null)el.value=v;};
-  set('Title',rec.id); set('IssuingAuthority',rec.authority);
-  set('RFPTitle',rec.title); set('RFPValue',rec.value||'');
-  set('RFPCategory',rec.rfpCategory); set('CountryOfOrigin',rec.region);
-  set('Industry',rec.industry); set('Source',rec.source);
-  set('SourceType',rec.sourceType); set('IdentificationDate',rec.identDate);
-  set('AssessmentDate',rec.assessmentDate); set('LastActivityTime',rec.lastActivity);
-  set('CurrentStage',rec.stage); set('OpportunityStatus',rec.status);
-  set('SubmissionStatus',rec.submissionStatus); set('SubmissionDeadline',rec.deadline);
-  set('QueriesToBeAddressed',rec.queries); set('QuerySubmissionDeadline',rec.queryDeadline);
-  set('ResponseReceivedDate',rec.responseDate); set('WinProbability',rec.winProb);
-  set('BlockingCriteria',rec.blocking); set('Comments',rec.remarks);
-  document.getElementById('rfpModalOverlay').classList.add('open');
-}
-
-function closeRfpModal(){
-  document.getElementById('rfpModalOverlay').classList.remove('open');
-  editingSpId=null;
-}
-
-async function submitRfpForm(e){
-  e.preventDefault();
-  const form=document.getElementById('rfpForm');
-  const btn=document.getElementById('rfpSubmitBtn');
-  btn.disabled=true; btn.textContent='Saving…';
-  const fields=buildFields(form);
-
-  if(!isLive){
-    toast('info','Sign in to save to SharePoint');
-    closeRfpModal(); btn.disabled=false; btn.textContent='Save RFP'; return;
-  }
-  try{
-    if(editingSpId){
-      const url=`${GRAPH}/sites/${SP_SITE_ID}/lists/${SP_LIST_ID}/items/${editingSpId}/fields`;
-      const r=await gPatch(url,fields);
-      if(!r.ok){const e2=await r.json().catch(()=>({}));throw new Error(e2.error?.message||`HTTP ${r.status}`);}
-      toast('success','RFP updated');
-    } else {
-      const url=`${GRAPH}/sites/${SP_SITE_ID}/lists/${SP_LIST_ID}/items`;
-      const r=await gPost(url,{fields});
-      if(!r.ok){const e2=await r.json().catch(()=>({}));throw new Error(e2.error?.message||`HTTP ${r.status}`);}
-      toast('success','RFP added');
-    }
-    closeRfpModal();
-    await loadLiveData();
-  }catch(err){toast('error','Save failed: '+err.message);}
-  btn.disabled=false; btn.textContent='Save RFP';
-}
-
-function buildFields(form){
-  const d={};
-  const add=(k,v)=>{if(v!==''&&v!=null)d[k]=v;};
-  add('Title',           form.elements['Title'].value.trim());
-  add('IssuingAuthority',form.elements['IssuingAuthority'].value.trim());
-  add('RFPTitle',        form.elements['RFPTitle'].value.trim());
-  const v=form.elements['RFPValue'].value; if(v!=='')add('RFPValue',parseFloat(v));
-  add('RFPCategory',     form.elements['RFPCategory'].value);
-  add('CountryOfOrigin', form.elements['CountryOfOrigin'].value);
-  add('Industry',        form.elements['Industry'].value.trim());
-  add('Source',          form.elements['Source'].value.trim());
-  add('SourceType',      form.elements['SourceType'].value);
-  add('IdentificationDate',    form.elements['IdentificationDate'].value||null);
-  add('AssessmentDate',        form.elements['AssessmentDate'].value||null);
-  add('LastActivityTime',      form.elements['LastActivityTime'].value||null);
-  add('CurrentStage',          form.elements['CurrentStage'].value);
-  add('OpportunityStatus',     form.elements['OpportunityStatus'].value);
-  add('SubmissionStatus',      form.elements['SubmissionStatus'].value);
-  add('SubmissionDeadline',    form.elements['SubmissionDeadline'].value||null);
-  add('QueriesToBeAddressed',  form.elements['QueriesToBeAddressed'].value);
-  add('QuerySubmissionDeadline',form.elements['QuerySubmissionDeadline'].value||null);
-  add('ResponseReceivedDate',  form.elements['ResponseReceivedDate'].value||null);
-  add('WinProbability',        form.elements['WinProbability'].value);
-  add('BlockingCriteria',      form.elements['BlockingCriteria'].value);
-  add('Comments',              form.elements['Comments'].value.trim());
-  return d;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// DELETE
-// ═══════════════════════════════════════════════════════════════════
-function confirmDelete(rfpId){
-  const rec=getData().find(r=>r.id===rfpId);
-  document.getElementById('confirmMsg').textContent=
-    `Delete "${rfpId}${rec?.title?' — '+rec.title:''}"? This action cannot be undone.`;
-  document.getElementById('confirmOverlay').classList.add('open');
-  document.getElementById('confirmOkBtn').onclick=()=>doDelete(rfpId);
-}
-function closeConfirm(){ document.getElementById('confirmOverlay').classList.remove('open'); }
-
-async function doDelete(rfpId){
-  closeConfirm();
-  if(!isLive){toast('info','Sign in to delete from SharePoint');return;}
-  const rec=getData().find(r=>r.id===rfpId);
-  if(!rec?._spId){toast('error','SharePoint item ID not found');return;}
-  try{
-    const r=await gDelete(`${GRAPH}/sites/${SP_SITE_ID}/lists/${SP_LIST_ID}/items/${rec._spId}`);
-    if(!r.ok&&r.status!==204)throw new Error(`HTTP ${r.status}`);
-    toast('success','RFP deleted');
-    await loadLiveData();
-  }catch(err){toast('error','Delete failed: '+err.message);}
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// DOCUMENTS
-// ═══════════════════════════════════════════════════════════════════
-function openDocModal(rfpId, rfpTitle, region){
-  currentDocRfp={id:rfpId, title:rfpTitle, region:region};
-  document.getElementById('docModalTitle').textContent=`Documents — ${rfpId}`;
-  document.getElementById('docModalPath').textContent=`OneDrive: RFP Documents / ${region} / ${rfpId}`;
-  document.getElementById('docModalOverlay').classList.add('open');
-  loadDocList();
-}
-function closeDocModal(){
-  document.getElementById('docModalOverlay').classList.remove('open');
-  currentDocRfp=null;
-}
-
-async function loadDocList(){
-  const list=document.getElementById('docList');
-  list.innerHTML='<div class="loading-center"><span class="spinner"></span> Loading files…</div>';
-  if(!isLive||!accessToken){
-    list.innerHTML='<div class="empty" style="color:var(--muted2)">Sign in to view documents</div>';
-    return;
-  }
-  const {id:rfpId,region}=currentDocRfp;
-  const path=`RFP Documents/${region}/${rfpId}`;
-  try{
-    const resp=await gGet(`${GRAPH}/me/drive/root:/${encodeURIComponent(path)}:/children`);
-    if(resp.status===404){
-      list.innerHTML='<div class="empty" style="color:var(--muted2)">No documents yet — upload files below</div>';
-      return;
-    }
-    if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
-    const json=await resp.json();
-    const files=(json.value||[]).filter(f=>!f.folder);
-    if(!files.length){
-      list.innerHTML='<div class="empty" style="color:var(--muted2)">No documents yet — upload files below</div>';
-      return;
-    }
-    list.innerHTML=files.map(f=>`
-      <div class="doc-item">
-        <span class="doc-icon">&#128196;</span>
-        <div style="flex:1;min-width:0">
-          <div class="doc-name">${X(f.name)}</div>
-          <div class="doc-meta">${fmtSize(f.size)} · Modified ${fmtDate(f.lastModifiedDateTime?.split('T')[0])}</div>
-        </div>
-        ${f['@microsoft.graph.downloadUrl']
-          ?`<a class="doc-dl" href="${X(f['@microsoft.graph.downloadUrl'])}" target="_blank" download="${X(f.name)}">Download</a>`
-          :''}
-      </div>`).join('');
-  }catch(err){
-    list.innerHTML=`<div class="empty" style="color:var(--red)">Error: ${X(err.message)}</div>`;
-  }
-}
-
-function handleDragOver(e){e.preventDefault();document.getElementById('dropZone').classList.add('drag-over');}
-function handleDragLeave(){document.getElementById('dropZone').classList.remove('drag-over');}
-function handleDrop(e){e.preventDefault();handleDragLeave();uploadFiles(Array.from(e.dataTransfer.files));}
-function handleFileSelect(e){uploadFiles(Array.from(e.target.files));e.target.value='';}
-
-async function uploadFiles(files){
-  if(!isLive||!accessToken){toast('error','Sign in to upload');return;}
-  if(!currentDocRfp||!files.length) return;
-  const prog=document.getElementById('uploadProgress');
-  const {id:rfpId,region}=currentDocRfp;
-  for(const file of files){
-    prog.style.display='flex';
-    prog.innerHTML=`<span class="spinner" style="width:14px;height:14px;border-width:2px"></span>&nbsp;Uploading ${X(file.name)}…`;
-    const path=`RFP Documents/${region}/${rfpId}/${file.name}`;
-    try{
-      const r=await gPut(`${GRAPH}/me/drive/root:/${encodeURIComponent(path)}:/content`,file);
-      if(!r.ok){const e2=await r.json().catch(()=>({}));throw new Error(e2.error?.message||`HTTP ${r.status}`);}
-      toast('success','Uploaded: '+file.name);
-    }catch(err){toast('error','Upload failed ('+file.name+'): '+err.message);}
-  }
-  prog.style.display='none';
-  loadDocList();
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// GAPS DETAIL
-// ═══════════════════════════════════════════════════════════════════
-function openGapsDetail(criteria){
-  const rfps=getData().filter(r=>r.blocking===criteria);
-  document.getElementById('gapsDetailTitle').textContent=`Blocked by: ${criteria}`;
-  document.getElementById('gapsDetailTbody').innerHTML=rfps.map(r=>`
-    <tr>
-      <td><span class="rfp-id">${X(r.id)}</span></td>
-      <td class="trunc" title="${X(r.authority)}">${X(r.authority)}</td>
-      <td class="td-muted">${X(r.region)}</td>
-      <td class="td-muted" style="white-space:nowrap">${r.value?'$'+fmtNum(r.value):'—'}</td>
-      <td class="td-muted">${X(r.remarks)||'—'}</td>
-    </tr>`).join('');
-  document.getElementById('gapsDetailOverlay').classList.add('open');
-}
-function closeGapsDetail(){document.getElementById('gapsDetailOverlay').classList.remove('open');}
-
-// ═══════════════════════════════════════════════════════════════════
-// TABS
-// ═══════════════════════════════════════════════════════════════════
-function switchTab(name){
-  const names=['overview','pipeline','gaps'];
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
-  if(name==='pipeline') applyFilters();
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════════════════
-function X(s){
-  if(s==null)return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-                  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-function fmtDate(iso){
-  if(!iso)return '—';
-  try{
-    const d=new Date(iso.length===10?iso+'T00:00:00':iso);
-    return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-  }catch{return iso;}
-}
-function fmtNum(n){return n==null?'—':Number(n).toLocaleString();}
-function fmtSize(b){
-  if(!b)return '—';
-  if(b<1024)return b+' B';
-  if(b<1048576)return (b/1024).toFixed(1)+' KB';
-  return (b/1048576).toFixed(1)+' MB';
-}
-function statusBadge(s){
-  const m={'In Progress':'badge-blue','Submitted':'badge-orange','Won':'badge-green',
-           'Lost':'badge-red','No-Go':'badge-red','Under Evaluation':'badge-yellow','On Hold':'badge-gray'};
-  return `<span class="badge ${m[s]||'badge-gray'}">${X(s)||'—'}</span>`;
-}
-function probCls(p){return p==='High'?'prob-high':p==='Medium'?'prob-medium':p==='Low'?'prob-low':'td-muted';}
-
-// ═══════════════════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════════════════
-function toast(type, msg){
-  const c=document.getElementById('toastContainer');
-  const el=document.createElement('div');
-  el.className=`toast ${type}`;
-  const ic={success:'✓',error:'✕',info:'i'};
-  el.innerHTML=`<span style="font-weight:700">${ic[type]||'i'}</span><span>${X(msg)}</span>`;
-  c.appendChild(el);
-  setTimeout(()=>{el.style.animation='slideOut .2s ease forwards';setTimeout(()=>el.remove(),220);},4500);
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// KEYBOARD
-// ═══════════════════════════════════════════════════════════════════
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    closeRfpModal(); closeDocModal(); closeGapsDetail(); closeConfirm();
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', init);
-</script>
 </body>
 </html>

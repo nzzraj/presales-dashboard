@@ -1,0 +1,200 @@
+// sharepoint.js — Microsoft Graph API calls for SharePoint lists and OneDrive documents
+var liveData = null;
+
+// Graph HTTP helpers
+function authHdr() {
+  return { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' };
+}
+function gGet(url)        { return fetch(url, { headers: authHdr() }); }
+function gPost(url, body) { return fetch(url, { method: 'POST',  headers: authHdr(), body: JSON.stringify(body) }); }
+function gPatch(url, body){ return fetch(url, { method: 'PATCH', headers: authHdr(), body: JSON.stringify(body) }); }
+function gDelete(url)     { return fetch(url, { method: 'DELETE', headers: authHdr() }); }
+function gPut(url, blob)  {
+  return fetch(url, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': blob.type || 'application/octet-stream' },
+    body: blob
+  });
+}
+
+// Load RFP list from SharePoint
+async function loadLiveData() {
+  setStatus('live', 'Loading from SharePoint…');
+  try {
+    var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_LIST_ID + '/items?expand=fields&$top=500';
+    var resp = await gGet(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status + ' ' + resp.statusText);
+    var json = await resp.json();
+    liveData = (json.value || []).map(spToRecord);
+    isLive = true;
+    applyUserUI(currentAcct);
+    var t = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    setStatus('live', 'Live data — last refreshed ' + t);
+    renderAll(liveData);
+    toast('success', 'Loaded ' + liveData.length + ' RFPs from SharePoint');
+  } catch(err) {
+    console.error(err);
+    toast('error', 'SharePoint load failed: ' + err.message);
+    showUnauthenticated();
+  }
+}
+
+// Map SharePoint list item to flat record object
+function spToRecord(item) {
+  var f = item.fields || {};
+  return {
+    _spId:            item.id,
+    id:               f.Title               || '',
+    authority:        f.IssuingAuthority     || '',
+    title:            f.RFPTitle             || '',
+    value:            f.RFPValue             || '',
+    region:           f.CountryOfOrigin      || '',
+    industry:         f.Industry             || '',
+    division:         f.SourceDivision       || '',
+    sourceType:       f.SourceType           || '',
+    identDate:        isoDate(f.IdentificationDate),
+    assessmentDate:   isoDate(f.AssessmentDate),
+    submissionStatus: f.SubmissionStatus     || '',
+    deadline:         isoDate(f.SubmissionDeadline),
+    status:           f.OpportunityStatus    || '',
+    queryDeadline:    isoDate(f.QuerySubmissionDeadline),
+    responseDate:     isoDate(f.ResponseReceivedDate),
+    remarks:          f.Comments             || '',
+    blocking:         f.BlockingCategory     || '',
+    blockingDetail:   f.BlockingDetail       || '',
+    documentPath:     f.DocumentPath         || ''
+  };
+}
+function isoDate(s) { return s ? s.split('T')[0] : ''; }
+
+// Build fields object from form for Graph API POST/PATCH
+function buildFields(form) {
+  var d = {};
+  function add(k, v) { if (v !== '' && v != null) d[k] = v; }
+  add('Title',                  form.elements['RFPId'].value.trim());
+  add('IssuingAuthority',       form.elements['IssuingAuthority'].value.trim());
+  add('RFPTitle',               form.elements['RFPTitle'].value.trim());
+  add('RFPValue',               form.elements['RFPValue'].value.trim());
+  add('CountryOfOrigin',        form.elements['CountryOfOrigin'].value.trim());
+  add('Industry',               form.elements['Industry'].value.trim());
+  add('SourceDivision',         form.elements['SourceDivision'].value);
+  add('SourceType',             form.elements['SourceType'].value.trim());
+  add('IdentificationDate',     form.elements['IdentificationDate'].value || null);
+  add('AssessmentDate',         form.elements['AssessmentDate'].value || null);
+  add('SubmissionStatus',       form.elements['SubmissionStatus'].value);
+  add('SubmissionDeadline',     form.elements['SubmissionDeadline'].value || null);
+  add('OpportunityStatus',      form.elements['OpportunityStatus'].value);
+  add('QuerySubmissionDeadline',form.elements['QuerySubmissionDeadline'].value || null);
+  add('ResponseReceivedDate',   form.elements['ResponseReceivedDate'].value || null);
+  add('Comments',               form.elements['Comments'].value.trim());
+  add('BlockingCategory',       form.elements['BlockingCategory'].value);
+  add('BlockingDetail',         form.elements['BlockingDetail'].value.trim());
+  add('DocumentPath',           form.elements['DocumentPath'].value.trim());
+  return d;
+}
+
+// Submit add/edit form
+async function submitRfpForm(e) {
+  e.preventDefault();
+  var form = document.getElementById('rfpForm');
+  var btn = document.getElementById('rfpSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  var fields = buildFields(form);
+
+  if (!isLive) {
+    toast('info', 'Sign in to save to SharePoint');
+    closeRfpModal(); btn.disabled = false; btn.textContent = 'Save RFP'; return;
+  }
+  try {
+    if (editingSpId) {
+      var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_LIST_ID + '/items/' + editingSpId + '/fields';
+      var r = await gPatch(url, fields);
+      if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
+      toast('success', 'RFP updated');
+    } else {
+      var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_LIST_ID + '/items';
+      var r = await gPost(url, { fields: fields });
+      if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
+      toast('success', 'RFP added');
+    }
+    closeRfpModal();
+    await loadLiveData();
+  } catch(err) { toast('error', 'Save failed: ' + err.message); }
+  btn.disabled = false; btn.textContent = 'Save RFP';
+}
+
+// Delete RFP
+async function doDelete(rfpId) {
+  closeConfirm();
+  if (!isLive) { toast('info', 'Sign in to delete from SharePoint'); return; }
+  var rec = getData().find(function(r) { return r.id === rfpId; });
+  if (!rec || !rec._spId) { toast('error', 'SharePoint item ID not found'); return; }
+  try {
+    var r = await gDelete(GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_LIST_ID + '/items/' + rec._spId);
+    if (!r.ok && r.status !== 204) throw new Error('HTTP ' + r.status);
+    toast('success', 'RFP deleted');
+    await loadLiveData();
+  } catch(err) { toast('error', 'Delete failed: ' + err.message); }
+}
+
+// Document management
+async function loadDocList() {
+  var list = document.getElementById('docList');
+  list.innerHTML = '<div class="loading-center"><span class="spinner"></span> Loading files…</div>';
+  if (!isLive || !accessToken) {
+    list.innerHTML = '<div class="empty" style="color:var(--muted2)">Sign in to view documents</div>';
+    return;
+  }
+  var rfpId = currentDocRfp.id;
+  var region = currentDocRfp.region;
+  var path = 'RFP Documents/' + region + '/' + rfpId;
+  try {
+    var resp = await gGet(GRAPH + '/me/drive/root:/' + encodeURIComponent(path) + ':/children');
+    if (resp.status === 404) {
+      list.innerHTML = '<div class="empty" style="color:var(--muted2)">No documents yet — upload files below</div>';
+      return;
+    }
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var json = await resp.json();
+    var files = (json.value || []).filter(function(f) { return !f.folder; });
+    if (!files.length) {
+      list.innerHTML = '<div class="empty" style="color:var(--muted2)">No documents yet — upload files below</div>';
+      return;
+    }
+    list.innerHTML = files.map(function(f) {
+      return '<div class="doc-item">' +
+        '<span class="doc-icon">&#128196;</span>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div class="doc-name">' + X(f.name) + '</div>' +
+          '<div class="doc-meta">' + fmtSize(f.size) + ' · Modified ' + fmtDate(f.lastModifiedDateTime ? f.lastModifiedDateTime.split('T')[0] : '') + '</div>' +
+        '</div>' +
+        (f['@microsoft.graph.downloadUrl']
+          ? '<a class="doc-dl" href="' + X(f['@microsoft.graph.downloadUrl']) + '" target="_blank" download="' + X(f.name) + '">Download</a>'
+          : '') +
+      '</div>';
+    }).join('');
+  } catch(err) {
+    list.innerHTML = '<div class="empty" style="color:var(--red)">Error: ' + X(err.message) + '</div>';
+  }
+}
+
+async function uploadFiles(files) {
+  if (!isLive || !accessToken) { toast('error', 'Sign in to upload'); return; }
+  if (!currentDocRfp || !files.length) return;
+  var prog = document.getElementById('uploadProgress');
+  var rfpId = currentDocRfp.id;
+  var region = currentDocRfp.region;
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    prog.style.display = 'flex';
+    prog.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px"></span>&nbsp;Uploading ' + X(file.name) + '…';
+    var path = 'RFP Documents/' + region + '/' + rfpId + '/' + file.name;
+    try {
+      var r = await gPut(GRAPH + '/me/drive/root:/' + encodeURIComponent(path) + ':/content', file);
+      if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
+      toast('success', 'Uploaded: ' + file.name);
+    } catch(err) { toast('error', 'Upload failed (' + file.name + '): ' + err.message); }
+  }
+  prog.style.display = 'none';
+  loadDocList();
+}
