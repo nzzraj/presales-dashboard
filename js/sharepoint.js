@@ -52,56 +52,58 @@ async function loadLiveData() {
 }
 
 // Map SharePoint list item to flat record object
+// Internal names from debugListFields() — some have typos in SP, keep as-is
 function spToRecord(item) {
   var f = item.fields || {};
   return {
     _spId:            item.id,
-    id:               f.Title               || '',
-    authority:        f.IssuingAuthority     || '',
-    title:            f.RFPTitle             || '',
-    value:            f.RFPValue             || '',
-    region:           f.CountryOfOrigin      || '',
-    industry:         f.Industry             || '',
-    division:         f.SourceDivision       || '',
-    sourceType:       f.SourceType           || '',
-    identDate:        isoDate(f.IdentificationDate),
+    id:               f.RFPID                || '',
+    authority:        f.IssuingAuthority      || '',
+    title:            f.Title                 || '',
+    value:            f.EstimatedValue        || '',
+    region:           f.Country               || '',
+    industry:         f.Industry              || '',
+    division:         f.SourcePortal          || '',
+    sourceType:       f.RFPCategory           || '',
+    identDate:        isoDate(f.IdentificatonDate),
     assessmentDate:   isoDate(f.AssessmentDate),
-    submissionStatus: f.SubmissionStatus     || '',
+    submissionStatus: f.Status                || '',
     deadline:         isoDate(f.SubmissionDeadline),
-    status:           f.OpportunityStatus    || '',
+    status:           f.OpportunityStatus     || '',
     queryDeadline:    isoDate(f.QuerySubmissionDeadline),
     responseDate:     isoDate(f.ResponseReceivedDate),
-    remarks:          f.Comments             || '',
-    blocking:         f.BlockingCategory     || '',
-    blockingDetail:   f.BlockingDetail       || '',
-    documentPath:     f.DocumentPath         || ''
+    remarks:          f.RFPRemarks            || '',
+    blocking:         f.BlockingCriteria      || '',
+    blockingDetail:   f.CrieriaDetail         || '',
+    documentPath:     f.DocumentPath          || ''
   };
 }
 function isoDate(s) { return s ? s.split('T')[0] : ''; }
 
 // Build fields object from form for Graph API POST/PATCH
+// Keys = SharePoint internal column names (from debugListFields)
 function buildFields(form) {
   var d = {};
   function add(k, v) { if (v !== '' && v != null) d[k] = v; }
-  add('Title',                  form.elements['RFPId'].value.trim());
-  add('IssuingAuthority',       form.elements['IssuingAuthority'].value.trim());
-  add('RFPTitle',               form.elements['RFPTitle'].value.trim());
-  add('RFPValue',               form.elements['RFPValue'].value.trim());
-  add('CountryOfOrigin',        form.elements['CountryOfOrigin'].value.trim());
-  add('Industry',               form.elements['Industry'].value.trim());
-  add('SourceDivision',         form.elements['SourceDivision'].value);
-  add('SourceType',             form.elements['SourceType'].value.trim());
-  add('IdentificationDate',     form.elements['IdentificationDate'].value || null);
-  add('AssessmentDate',         form.elements['AssessmentDate'].value || null);
-  add('SubmissionStatus',       form.elements['SubmissionStatus'].value);
-  add('SubmissionDeadline',     form.elements['SubmissionDeadline'].value || null);
-  add('OpportunityStatus',      form.elements['OpportunityStatus'].value);
-  add('QuerySubmissionDeadline',form.elements['QuerySubmissionDeadline'].value || null);
-  add('ResponseReceivedDate',   form.elements['ResponseReceivedDate'].value || null);
-  add('Comments',               form.elements['Comments'].value.trim());
-  add('BlockingCategory',       form.elements['BlockingCategory'].value);
-  add('BlockingDetail',         form.elements['BlockingDetail'].value.trim());
-  add('DocumentPath',           form.elements['DocumentPath'].value.trim());
+  add('RFPID',                   form.elements['RFPId'].value.trim());
+  add('Title',                   form.elements['RFPTitle'].value.trim());
+  add('IssuingAuthority',        form.elements['IssuingAuthority'].value.trim());
+  add('EstimatedValue',          form.elements['RFPValue'].value.trim());
+  add('Country',                 form.elements['CountryOfOrigin'].value.trim());
+  add('Industry',                form.elements['Industry'].value.trim());
+  add('SourcePortal',            form.elements['SourceDivision'].value);
+  add('RFPCategory',             form.elements['SourceType'].value.trim());
+  add('IdentificatonDate',       form.elements['IdentificationDate'].value || null);
+  add('AssessmentDate',          form.elements['AssessmentDate'].value || null);
+  add('Status',                  form.elements['SubmissionStatus'].value);
+  add('SubmissionDeadline',      form.elements['SubmissionDeadline'].value || null);
+  add('OpportunityStatus',       form.elements['OpportunityStatus'].value);
+  add('QuerySubmissionDeadline', form.elements['QuerySubmissionDeadline'].value || null);
+  add('ResponseReceivedDate',    form.elements['ResponseReceivedDate'].value || null);
+  add('RFPRemarks',              form.elements['Comments'].value.trim());
+  add('BlockingCriteria',        form.elements['BlockingCategory'].value);
+  add('CrieriaDetail',           form.elements['BlockingDetail'].value.trim());
+  add('DocumentPath',            form.elements['DocumentPath'].value.trim());
   return d;
 }
 

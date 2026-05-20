@@ -31,16 +31,15 @@ function renderScorecards(data) {
   var ip = data.filter(function(r){ return r.status === 'In Progress'; }).length;
   var sb = data.filter(function(r){ return r.status === 'Submitted'; }).length;
   var wn = data.filter(function(r){ return r.status === 'Won'; }).length;
-  var nb = data.filter(function(r){ return r.status === 'No Bid'; }).length;
+  var dr = data.filter(function(r){ return r.status === 'Dropped'; }).length;
   var ls = data.filter(function(r){ return r.status === 'Lost'; }).length;
-  var oh = data.filter(function(r){ return r.status === 'On Hold'; }).length;
   var cards = [
-    { l: 'Total RFPs',    v: n,     s: 'All tracked',           c: 'sc-white' },
-    { l: 'In Progress',   v: ip,    s: 'Active bids',           c: 'sc-blue' },
-    { l: 'Submitted',     v: sb,    s: 'Awaiting decision',     c: 'sc-orange' },
-    { l: 'Won',           v: wn,    s: 'Closed won',            c: 'sc-green' },
-    { l: 'No Bid / Lost', v: nb+ls, s: 'Declined / closed lost',c: 'sc-red' },
-    { l: 'On Hold',       v: oh,    s: 'Paused',                c: 'sc-yellow' }
+    { l: 'Total RFPs',       v: n,      s: 'All tracked',            c: 'sc-white' },
+    { l: 'In Progress',      v: ip,     s: 'Active bids',            c: 'sc-blue' },
+    { l: 'Submitted',        v: sb,     s: 'Awaiting decision',      c: 'sc-orange' },
+    { l: 'Won',              v: wn,     s: 'Closed won',             c: 'sc-green' },
+    { l: 'Lost',             v: ls,     s: 'Closed lost',            c: 'sc-red' },
+    { l: 'Dropped',          v: dr,     s: 'Declined / no-bid',      c: 'sc-yellow' }
   ];
   document.getElementById('scorecards').innerHTML = cards.map(function(c) {
     return '<div class="scorecard ' + c.c + '">' +
@@ -138,7 +137,7 @@ function renderRegions(data) {
     if (!map[k]) map[k] = { total: 0, active: 0, nogo: 0 };
     map[k].total++;
     if (r.status === 'In Progress' || r.status === 'Submitted') map[k].active++;
-    if (r.status === 'No Bid' || r.status === 'Lost') map[k].nogo++;
+    if (r.status === 'Dropped' || r.status === 'Lost') map[k].nogo++;
   });
   var sorted = Object.entries(map).sort(function(a, b) { return b[1].total - a[1].total; });
   var max = sorted.length ? sorted[0][1].total : 1;
@@ -321,7 +320,7 @@ function closeRfpModal() {
 // Show/hide blocking fields based on SubmissionStatus
 function toggleBlockingFields() {
   var ss = document.getElementById('rfpForm').elements['SubmissionStatus'].value;
-  var show = (ss === 'No Bid');
+  var show = (ss === 'Dropped');
   document.getElementById('blockingCategoryGroup').style.display = show ? '' : 'none';
   document.getElementById('blockingDetailGroup').style.display = show ? '' : 'none';
   if (!show) {
@@ -416,7 +415,7 @@ function fmtSize(b) {
 function statusBadge(s) {
   var m = {
     'In Progress': 'badge-blue', 'Submitted': 'badge-orange', 'Won': 'badge-green',
-    'Lost': 'badge-red', 'No Bid': 'badge-red', 'Not Submitted': 'badge-yellow', 'On Hold': 'badge-gray'
+    'Lost': 'badge-red', 'Dropped': 'badge-red', 'Not Submitted': 'badge-yellow'
   };
   return '<span class="badge ' + (m[s] || 'badge-gray') + '">' + (X(s) || '—') + '</span>';
 }

@@ -101,8 +101,9 @@
       <select class="f-input" id="filterStatus" onchange="applyFilters()">
         <option value="">All Statuses</option>
         <option>In Progress</option>
-        <option>Submitted</option><option>Won</option>
-        <option>Lost</option><option>No Bid</option><option>On Hold</option>
+        <option>Won</option>
+        <option>Lost</option>
+        <option>Dropped</option>
       </select>
       <select class="f-input" id="filterDivision" onchange="applyFilters()">
         <option value="">All Divisions</option>
@@ -216,9 +217,10 @@
             <label class="flabel">Submission Status</label>
             <select class="finput" name="SubmissionStatus" onchange="toggleBlockingFields()">
               <option value="">— Select —</option>
-              <option>Not Submitted</option>
+              <option>In Progress</option>
               <option>Submitted</option>
-              <option>No Bid</option>
+              <option>Not Submitted</option>
+              <option>Dropped</option>
             </select>
           </div>
           <!-- 12. Submission Deadline -->
@@ -232,11 +234,9 @@
             <select class="finput" name="OpportunityStatus">
               <option value="">— Select —</option>
               <option>In Progress</option>
-              <option>Submitted</option>
               <option>Won</option>
               <option>Lost</option>
-              <option>No Bid</option>
-              <option>On Hold</option>
+              <option>Dropped</option>
             </select>
           </div>
           <!-- 14. Query Submission Deadline -->

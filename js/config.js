@@ -31,7 +31,7 @@ var BLOCKING_CATEGORIES = [
 var DIVISIONS = ['CEE Division', 'India Division', 'SEA Division'];
 
 // Submission status choices
-var SUBMISSION_STATUSES = ['Not Submitted', 'Submitted', 'No Bid'];
+var SUBMISSION_STATUSES = ['In Progress', 'Submitted', 'Not Submitted', 'Dropped'];
 
 // Opportunity status choices
-var OPPORTUNITY_STATUSES = ['In Progress', 'Submitted', 'Won', 'Lost', 'No Bid', 'On Hold'];
+var OPPORTUNITY_STATUSES = ['In Progress', 'Won', 'Lost', 'Dropped'];
