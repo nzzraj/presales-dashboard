@@ -1,6 +1,18 @@
 // sharepoint.js — Microsoft Graph API calls for SharePoint lists and OneDrive documents
 var liveData = null;
 
+// Debug: call debugListFields() from browser console to see actual SharePoint column internal names
+async function debugListFields() {
+  var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_LIST_ID + '/columns';
+  var resp = await gGet(url);
+  var json = await resp.json();
+  var cols = (json.value || [])
+    .filter(function(c) { return !c.readOnly || c.name === 'Title'; })
+    .map(function(c) { return { display: c.displayName, internal: c.name, type: c.text ? 'text' : c.choice ? 'choice' : c.dateTime ? 'dateTime' : c.number ? 'number' : c.note ? 'note' : 'other' }; });
+  console.table(cols);
+  return cols;
+}
+
 // Graph HTTP helpers
 function authHdr() {
   return { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' };
