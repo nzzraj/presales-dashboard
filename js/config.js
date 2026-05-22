@@ -7,7 +7,7 @@ var MSAL_CONFIG = {
   },
   cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true }
 };
-var SCOPES = ['Sites.ReadWrite.All', 'Files.ReadWrite.All', 'User.Read'];
+var SCOPES = ['Sites.ReadWrite.All', 'Files.ReadWrite', 'User.Read'];
 
 var SP_SITE_ID  = '8d80a518-b3c8-45d3-80e6-d077a3e8e0bd';
 var SP_LIST_ID  = '2951b765-1c2f-48f1-83ce-54d53ca3ebb3';
@@ -16,8 +16,8 @@ var SP_HOST     = 'saintsandmastersglobal.sharepoint.com';
 
 var GRAPH = 'https://graph.microsoft.com/v1.0';
 
-// OneDrive shared folder base path (shortcut in user's OneDrive root)
-var ONEDRIVE_BASE = "Sabarish Sriram's files - RFP Documents";
+// OneDrive folder at root of user's drive
+var ONEDRIVE_BASE = 'RFP Documents';
 
 // Blocking categories (used in form dropdowns and gap analysis)
 var BLOCKING_CATEGORIES = [
