@@ -16,8 +16,8 @@ var SP_HOST     = 'saintsandmastersglobal.sharepoint.com';
 
 var GRAPH = 'https://graph.microsoft.com/v1.0';
 
-// OneDrive shared folder shortcut at root of user's drive
-var ONEDRIVE_BASE = "Sabarish Sriram's files - RFP Documents";
+// OneDrive folder at root of user's drive (RFP Documents/{Country}/{RFP-ID}/)
+var ONEDRIVE_BASE = 'RFP Documents';
 
 // Blocking categories (used in form dropdowns and gap analysis)
 var BLOCKING_CATEGORIES = [
