@@ -277,6 +277,8 @@ function openAddModal() {
   editingSpId = null;
   document.getElementById('rfpModalTitle').textContent = 'Add New RFP';
   document.getElementById('rfpForm').reset();
+  document.getElementById('rfpFileInput').value = '';
+  document.getElementById('rfpFileList').innerHTML = '';
   toggleBlockingFields();
   document.getElementById('rfpModalOverlay').classList.add('open');
 }
@@ -359,6 +361,28 @@ function handleDragOver(e) { e.preventDefault(); document.getElementById('dropZo
 function handleDragLeave() { document.getElementById('dropZone').classList.remove('drag-over'); }
 function handleDrop(e) { e.preventDefault(); handleDragLeave(); uploadFiles(Array.from(e.dataTransfer.files)); }
 function handleFileSelect(e) { uploadFiles(Array.from(e.target.files)); e.target.value = ''; }
+
+// Add RFP form — file attachment handlers
+function handleRfpFileDrop(e) {
+  var input = document.getElementById('rfpFileInput');
+  input.files = e.dataTransfer.files;
+  updateRfpFileList();
+}
+
+function updateRfpFileList() {
+  var input = document.getElementById('rfpFileInput');
+  var list = document.getElementById('rfpFileList');
+  if (!input.files.length) { list.innerHTML = ''; return; }
+  var html = '';
+  for (var i = 0; i < input.files.length; i++) {
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:var(--muted)">' +
+      '<span style="color:var(--accent)">&#128196;</span>' +
+      '<span style="flex:1;color:var(--text)">' + X(input.files[i].name) + '</span>' +
+      '<span>' + fmtSize(input.files[i].size) + '</span>' +
+    '</div>';
+  }
+  list.innerHTML = html;
+}
 
 // ═══════════════════════════════════════════════════════════════════
 // GAPS DETAIL MODAL

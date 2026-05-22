@@ -275,6 +275,21 @@
             <textarea class="finput" name="BlockingDetail" placeholder="e.g. Missing MAF letter, No Sophos partner status…"></textarea>
           </div>
           <!-- DocumentPath is auto-generated from Country + RFP ID on save -->
+          <!-- File attachment -->
+          <div class="fg full" style="margin-top:8px">
+            <label class="flabel">Attach RFP Documents <span style="color:var(--muted2);font-weight:400">(optional)</span></label>
+            <div class="drop-zone" id="rfpDropZone"
+                 onclick="document.getElementById('rfpFileInput').click()"
+                 ondragover="event.preventDefault();this.classList.add('drag-over')"
+                 ondragleave="this.classList.remove('drag-over')"
+                 ondrop="event.preventDefault();this.classList.remove('drag-over');handleRfpFileDrop(event)">
+              <input type="file" id="rfpFileInput" multiple onchange="updateRfpFileList()" style="display:none"/>
+              <div class="dz-icon">&#128206;</div>
+              <div><strong>Click to select</strong> or drag &amp; drop files</div>
+              <div style="font-size:11px;color:var(--muted2);margin-top:5px">Files will be saved to OneDrive: {Country}/{RFP-ID}/</div>
+            </div>
+            <div id="rfpFileList" style="margin-top:8px"></div>
+          </div>
         </div>
       </form>
     </div>

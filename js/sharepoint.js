@@ -136,6 +136,16 @@ async function submitRfpForm(e) {
       if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
       toast('success', 'RFP added');
     }
+    // Upload any attached files to OneDrive
+    var rfpFiles = document.getElementById('rfpFileInput');
+    if (rfpFiles && rfpFiles.files.length > 0) {
+      var country = form.elements['CountryOfOrigin'].value.trim();
+      var rfpId = form.elements['RFPId'].value.trim();
+      if (country && rfpId) {
+        btn.textContent = 'Uploading files…';
+        await uploadFilesForNewRfp(Array.from(rfpFiles.files), country, rfpId);
+      }
+    }
     closeRfpModal();
     await loadLiveData();
   } catch(err) { toast('error', 'Save failed: ' + err.message); }
@@ -156,13 +166,23 @@ async function doDelete(rfpId) {
   } catch(err) { toast('error', 'Delete failed: ' + err.message); }
 }
 
-// Build OneDrive folder path: RFP Documents/{Country}/{RFP-ID}
-// Slashes in RFP ID (e.g. 04886/2026) become dashes for safe folder names
-function docPath(region, rfpId) {
-  return 'RFP Documents/' + region + '/' + rfpId.replace(/\//g, '-');
+// Encode each path segment individually (don't encode the slashes)
+function encodeDrivePath(path) {
+  return path.split('/').map(function(s) { return encodeURIComponent(s); }).join('/');
 }
 
-// Document management
+// Build OneDrive folder path: {ONEDRIVE_BASE}/{Country}/{RFP-ID}
+// Slashes in RFP ID (e.g. 04886/2026) become dashes for safe folder names
+function docPath(region, rfpId) {
+  return ONEDRIVE_BASE + '/' + region + '/' + rfpId.replace(/\//g, '-');
+}
+
+// Graph API drive path URL builder
+function driveUrl(path) {
+  return GRAPH + '/me/drive/root:/' + encodeDrivePath(path);
+}
+
+// Document management — list files in an RFP's OneDrive folder
 async function loadDocList() {
   var list = document.getElementById('docList');
   list.innerHTML = '<div class="loading-center"><span class="spinner"></span> Loading files…</div>';
@@ -172,7 +192,7 @@ async function loadDocList() {
   }
   var path = docPath(currentDocRfp.region, currentDocRfp.id);
   try {
-    var resp = await gGet(GRAPH + '/me/drive/root:/' + encodeURIComponent(path) + ':/children');
+    var resp = await gGet(driveUrl(path) + ':/children');
     if (resp.status === 404) {
       list.innerHTML = '<div class="empty" style="color:var(--muted2)">No documents yet — upload files below</div>';
       return;
@@ -201,6 +221,7 @@ async function loadDocList() {
   }
 }
 
+// Upload files to OneDrive — used by both the Documents modal and the Add RFP form
 async function uploadFiles(files) {
   if (!isLive || !accessToken) { toast('error', 'Sign in to upload'); return; }
   if (!currentDocRfp || !files.length) return;
@@ -210,13 +231,33 @@ async function uploadFiles(files) {
     var file = files[i];
     prog.style.display = 'flex';
     prog.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px"></span>&nbsp;Uploading ' + X(file.name) + '…';
-    var path = basePath + '/' + file.name;
+    var filePath = basePath + '/' + file.name;
     try {
-      var r = await gPut(GRAPH + '/me/drive/root:/' + encodeURIComponent(path) + ':/content', file);
+      var r = await gPut(driveUrl(filePath) + ':/content', file);
       if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
       toast('success', 'Uploaded: ' + file.name);
     } catch(err) { toast('error', 'Upload failed (' + file.name + '): ' + err.message); }
   }
   prog.style.display = 'none';
   loadDocList();
+}
+
+// Upload files during Add RFP flow (no currentDocRfp yet, pass region + rfpId directly)
+async function uploadFilesForNewRfp(files, region, rfpId) {
+  if (!isLive || !accessToken) { toast('error', 'Sign in to upload'); return; }
+  if (!files.length || !region || !rfpId) return;
+  var basePath = docPath(region, rfpId);
+  var successCount = 0;
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    var filePath = basePath + '/' + file.name;
+    try {
+      var r = await gPut(driveUrl(filePath) + ':/content', file);
+      if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
+      successCount++;
+    } catch(err) { toast('error', 'Upload failed (' + file.name + '): ' + err.message); }
+  }
+  if (successCount > 0) {
+    toast('success', 'Uploaded ' + successCount + ' file' + (successCount > 1 ? 's' : '') + ' to OneDrive');
+  }
 }
