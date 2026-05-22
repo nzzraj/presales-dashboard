@@ -196,11 +196,12 @@ async function doDelete(rfpId) {
 // ═══════════════════════════════════════════════════════════════════
 
 // Load all actions for a given RFP ID
+// Note: Graph API $filter on SP list fields is unreliable, so we load all and filter client-side
 async function loadActions(rfpId) {
   if (!isLive || !accessToken || !SP_ACTIONS_ID) return [];
   try {
     var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_ACTIONS_ID +
-      '/items?expand=fields&$top=200&$filter=fields/RFPID eq \'' + encodeURIComponent(rfpId) + '\'';
+      '/items?expand=fields&$top=500';
     var resp = await gGet(url);
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var json = await resp.json();
@@ -214,6 +215,8 @@ async function loadActions(rfpId) {
         actionDate: f.ActionDate  || '',
         actionBy:   f.ActionBy    || ''
       };
+    }).filter(function(a) {
+      return a.rfpId === rfpId;
     }).sort(function(a, b) {
       return (b.actionDate || '').localeCompare(a.actionDate || '');
     });
