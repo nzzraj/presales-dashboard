@@ -9,6 +9,26 @@ var PAGE_SIZE     = 20;
 function getData() { return isLive && liveData ? liveData : []; }
 
 // ═══════════════════════════════════════════════════════════════════
+// THEME TOGGLE
+// ═══════════════════════════════════════════════════════════════════
+(function initTheme() {
+  var saved = localStorage.getItem('sm-theme');
+  if (saved === 'light' || saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', saved);
+  }
+})();
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var current = html.getAttribute('data-theme') || 'dark';
+  var next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('sm-theme', next);
+  // Re-render chart with new theme colors
+  if (liveData) renderBlockerChart(liveData);
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // RENDER ALL
 // ═══════════════════════════════════════════════════════════════════
 function renderAll(data) {
@@ -92,6 +112,14 @@ function renderBlockerChart(data) {
   var values = sorted.map(function(e) { return e[1]; });
   var h = Math.max(140, sorted.length * 30);
   canvas.style.height = h + 'px';
+  var isDark = (document.documentElement.getAttribute('data-theme') || 'dark') === 'dark';
+  var gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+  var tickColor = isDark ? '#888' : '#777';
+  var tooltipBg = isDark ? '#1A1A1A' : '#ffffff';
+  var tooltipBorder = isDark ? '#333' : '#ddd';
+  var tooltipTitle = isDark ? '#fff' : '#1a1a1a';
+  var tooltipBody = isDark ? '#999' : '#666';
+
   blockerChart = new Chart(canvas, {
     type: 'bar',
     data: {
@@ -115,13 +143,13 @@ function renderBlockerChart(data) {
             title: function(items) { return labels[items[0].dataIndex]; },
             label: function(item) { return ' ' + item.raw + ' bid' + (item.raw !== 1 ? 's' : '') + ' blocked'; }
           },
-          backgroundColor: '#1A1A1A', borderColor: '#333', borderWidth: 1,
-          titleColor: '#fff', bodyColor: '#999'
+          backgroundColor: tooltipBg, borderColor: tooltipBorder, borderWidth: 1,
+          titleColor: tooltipTitle, bodyColor: tooltipBody
         }
       },
       scales: {
-        x: { grid: { color: '#1c1c1c' }, ticks: { color: '#666', font: { size: 11 } }, beginAtZero: true },
-        y: { grid: { display: false }, ticks: { color: '#999', font: { size: 11 } } }
+        x: { grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 11 } }, beginAtZero: true },
+        y: { grid: { display: false }, ticks: { color: tickColor, font: { size: 11 } } }
       }
     }
   });
