@@ -307,7 +307,6 @@ function openEditModal(rfpId) {
   set('Comments', rec.remarks);
   set('BlockingCategory', rec.blocking);
   set('BlockingDetail', rec.blockingDetail);
-  set('DocumentPath', rec.documentPath);
   toggleBlockingFields();
   document.getElementById('rfpModalOverlay').classList.add('open');
 }
@@ -347,7 +346,7 @@ function closeConfirm() { document.getElementById('confirmOverlay').classList.re
 function openDocModal(rfpId, rfpTitle, region) {
   currentDocRfp = { id: rfpId, title: rfpTitle, region: region };
   document.getElementById('docModalTitle').textContent = 'Documents — ' + rfpId;
-  document.getElementById('docModalPath').textContent = 'OneDrive: RFP Documents / ' + region + ' / ' + rfpId;
+  document.getElementById('docModalPath').textContent = 'OneDrive: ' + docPath(region, rfpId);
   document.getElementById('docModalOverlay').classList.add('open');
   loadDocList();
 }

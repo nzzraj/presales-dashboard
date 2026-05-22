@@ -103,7 +103,12 @@ function buildFields(form) {
   add('RFPRemarks',              form.elements['Comments'].value.trim());
   add('BlockingCriteria',        form.elements['BlockingCategory'].value);
   add('CrieriaDetail',           form.elements['BlockingDetail'].value.trim());
-  add('DocumentPath',            form.elements['DocumentPath'].value.trim());
+  // Auto-generate document path from Country + RFP ID
+  var country = form.elements['CountryOfOrigin'].value.trim();
+  var rfpId = form.elements['RFPId'].value.trim().replace(/\//g, '-');
+  if (country && rfpId) {
+    add('DocumentPath', 'RFP Documents/' + country + '/' + rfpId);
+  }
   return d;
 }
 
@@ -151,6 +156,12 @@ async function doDelete(rfpId) {
   } catch(err) { toast('error', 'Delete failed: ' + err.message); }
 }
 
+// Build OneDrive folder path: RFP Documents/{Country}/{RFP-ID}
+// Slashes in RFP ID (e.g. 04886/2026) become dashes for safe folder names
+function docPath(region, rfpId) {
+  return 'RFP Documents/' + region + '/' + rfpId.replace(/\//g, '-');
+}
+
 // Document management
 async function loadDocList() {
   var list = document.getElementById('docList');
@@ -159,9 +170,7 @@ async function loadDocList() {
     list.innerHTML = '<div class="empty" style="color:var(--muted2)">Sign in to view documents</div>';
     return;
   }
-  var rfpId = currentDocRfp.id;
-  var region = currentDocRfp.region;
-  var path = 'RFP Documents/' + region + '/' + rfpId;
+  var path = docPath(currentDocRfp.region, currentDocRfp.id);
   try {
     var resp = await gGet(GRAPH + '/me/drive/root:/' + encodeURIComponent(path) + ':/children');
     if (resp.status === 404) {
@@ -196,13 +205,12 @@ async function uploadFiles(files) {
   if (!isLive || !accessToken) { toast('error', 'Sign in to upload'); return; }
   if (!currentDocRfp || !files.length) return;
   var prog = document.getElementById('uploadProgress');
-  var rfpId = currentDocRfp.id;
-  var region = currentDocRfp.region;
+  var basePath = docPath(currentDocRfp.region, currentDocRfp.id);
   for (var i = 0; i < files.length; i++) {
     var file = files[i];
     prog.style.display = 'flex';
     prog.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px"></span>&nbsp;Uploading ' + X(file.name) + '…';
-    var path = 'RFP Documents/' + region + '/' + rfpId + '/' + file.name;
+    var path = basePath + '/' + file.name;
     try {
       var r = await gPut(GRAPH + '/me/drive/root:/' + encodeURIComponent(path) + ':/content', file);
       if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
