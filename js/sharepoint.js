@@ -13,6 +13,37 @@ async function debugListFields() {
   return cols;
 }
 
+// Debug: call debugDriveInfo() from browser console to discover shared folder drive/item IDs
+async function debugDriveInfo() {
+  console.log('=== 1. Your drives ===');
+  var r1 = await gGet(GRAPH + '/me/drives');
+  var d1 = await r1.json();
+  (d1.value || []).forEach(function(d) {
+    console.log('Drive:', d.name, '| ID:', d.id, '| Type:', d.driveType);
+  });
+
+  console.log('\n=== 2. Root children (looking for shared folder shortcut) ===');
+  var r2 = await gGet(GRAPH + '/me/drive/root/children');
+  var d2 = await r2.json();
+  (d2.value || []).forEach(function(item) {
+    var info = { name: item.name, id: item.id, type: item.folder ? 'folder' : 'file' };
+    if (item.remoteItem) {
+      info.remoteDriveId = item.remoteItem.parentReference.driveId;
+      info.remoteItemId = item.remoteItem.id;
+    }
+    console.log(JSON.stringify(info));
+  });
+
+  console.log('\n=== 3. Shared with me ===');
+  var r3 = await gGet(GRAPH + '/me/drive/sharedWithMe');
+  var d3 = await r3.json();
+  (d3.value || []).forEach(function(item) {
+    console.log('Shared:', item.name, '| driveId:', item.remoteItem && item.remoteItem.parentReference.driveId, '| itemId:', item.remoteItem && item.remoteItem.id);
+  });
+
+  return 'Check console output above';
+}
+
 // Graph HTTP helpers
 function authHdr() {
   return { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' };
