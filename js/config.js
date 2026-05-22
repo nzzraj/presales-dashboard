@@ -11,8 +11,9 @@ var SCOPES = ['Sites.ReadWrite.All', 'Files.ReadWrite', 'User.Read'];
 
 var SP_SITE_ID  = '8d80a518-b3c8-45d3-80e6-d077a3e8e0bd';
 var SP_LIST_ID  = '2951b765-1c2f-48f1-83ce-54d53ca3ebb3';
-var SP_GAPS_ID  = '563a0568-9439-457e-89e1-3979a7d5dea6';
-var SP_HOST     = 'saintsandmastersglobal.sharepoint.com';
+var SP_GAPS_ID    = '563a0568-9439-457e-89e1-3979a7d5dea6';
+var SP_ACTIONS_ID = ''; // TODO: paste SharePoint "RFP Actions" list ID here
+var SP_HOST       = 'saintsandmastersglobal.sharepoint.com';
 
 var GRAPH = 'https://graph.microsoft.com/v1.0';
 
@@ -28,6 +29,18 @@ var BLOCKING_CATEGORIES = [
   'Portal & Administrative Gaps',
   'Commercial & Technical Capability Gaps',
   'Supply Chain & Pricing Gaps'
+];
+
+// Action type choices (for RFP activity timeline)
+var ACTION_TYPES = [
+  'Update',
+  'Call',
+  'Meeting',
+  'Submission',
+  'Document',
+  'Review',
+  'Query',
+  'Note'
 ];
 
 // Division choices

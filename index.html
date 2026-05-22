@@ -355,6 +355,68 @@
   </div>
 </div>
 
+<!-- RFP DETAIL VIEW (Summary + Activity Timeline) -->
+<div class="modal-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+  <div class="modal detail-modal">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-ttl" id="detailTitle">RFP Detail</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px" id="detailSubtitle"></div>
+      </div>
+      <button class="modal-x" onclick="closeDetail()">&#x2715;</button>
+    </div>
+    <div class="modal-body" style="padding:0;display:flex;flex-direction:column;overflow-y:auto">
+
+      <!-- RFP Summary Card -->
+      <div class="detail-summary" id="detailSummary"></div>
+
+      <!-- Add Action Form -->
+      <div class="detail-action-form">
+        <div class="action-form-title">Log Action</div>
+        <form id="actionForm" onsubmit="submitActionForm(event)" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div class="fg" style="flex:0 0 140px">
+            <label class="flabel">Type</label>
+            <select class="finput" name="ActionType" id="actionTypeSelect">
+              <option>Update</option>
+              <option>Call</option>
+              <option>Meeting</option>
+              <option>Submission</option>
+              <option>Document</option>
+              <option>Review</option>
+              <option>Query</option>
+              <option>Note</option>
+            </select>
+          </div>
+          <div class="fg" style="flex:1;min-width:200px">
+            <label class="flabel">Description</label>
+            <input class="finput" name="ActionDesc" id="actionDescInput" type="text" required placeholder="What did you do?"/>
+          </div>
+          <div class="fg" style="flex:0 0 180px">
+            <label class="flabel">Date &amp; Time</label>
+            <input class="finput" name="ActionDateTime" id="actionDateInput" type="datetime-local"/>
+          </div>
+          <button class="btn btn-primary btn-sm" id="actionSubmitBtn" type="submit" style="height:40px;margin-bottom:1px">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+            Log
+          </button>
+        </form>
+      </div>
+
+      <!-- Timeline -->
+      <div class="detail-timeline-wrap">
+        <div class="detail-timeline-header">
+          <span class="action-form-title">Activity Timeline</span>
+          <span class="timeline-count" id="timelineCount">0 actions</span>
+        </div>
+        <div class="timeline" id="timelineContainer">
+          <div class="loading-center"><span class="spinner"></span> Loading actions…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM DIALOG -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-box">

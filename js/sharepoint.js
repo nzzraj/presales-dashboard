@@ -191,6 +191,82 @@ async function doDelete(rfpId) {
   } catch(err) { toast('error', 'Delete failed: ' + err.message); }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// RFP ACTIONS (Activity Timeline)
+// ═══════════════════════════════════════════════════════════════════
+
+// Load all actions for a given RFP ID
+async function loadActions(rfpId) {
+  if (!isLive || !accessToken || !SP_ACTIONS_ID) return [];
+  try {
+    var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_ACTIONS_ID +
+      '/items?expand=fields&$top=200&$filter=fields/RFPID eq \'' + encodeURIComponent(rfpId) + '\'';
+    var resp = await gGet(url);
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var json = await resp.json();
+    return (json.value || []).map(function(item) {
+      var f = item.fields || {};
+      return {
+        _spId:      item.id,
+        rfpId:      f.RFPID       || '',
+        title:      f.Title       || '',
+        actionType: f.ActionType  || 'Note',
+        actionDate: f.ActionDate  || '',
+        actionBy:   f.ActionBy    || ''
+      };
+    }).sort(function(a, b) {
+      return (b.actionDate || '').localeCompare(a.actionDate || '');
+    });
+  } catch(err) {
+    console.error('loadActions error:', err);
+    toast('error', 'Failed to load actions: ' + err.message);
+    return [];
+  }
+}
+
+// Add a new action for an RFP
+async function addAction(rfpId, actionType, description, actionDate) {
+  if (!isLive || !accessToken || !SP_ACTIONS_ID) {
+    toast('info', 'Sign in to save actions');
+    return null;
+  }
+  var fields = {
+    RFPID: rfpId,
+    Title: description,
+    ActionType: actionType,
+    ActionDate: actionDate || new Date().toISOString(),
+    ActionBy: currentAcct ? (currentAcct.name || currentAcct.username || '') : ''
+  };
+  try {
+    var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_ACTIONS_ID + '/items';
+    var resp = await gPost(url, { fields: fields });
+    if (!resp.ok) {
+      var e2 = await resp.json().catch(function(){ return {}; });
+      throw new Error(e2.error && e2.error.message || 'HTTP ' + resp.status);
+    }
+    toast('success', 'Action logged');
+    return await resp.json();
+  } catch(err) {
+    toast('error', 'Failed to save action: ' + err.message);
+    return null;
+  }
+}
+
+// Delete an action by its SharePoint item ID
+async function deleteAction(actionSpId) {
+  if (!isLive || !accessToken || !SP_ACTIONS_ID) return false;
+  try {
+    var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_ACTIONS_ID + '/items/' + actionSpId;
+    var resp = await gDelete(url);
+    if (!resp.ok && resp.status !== 204) throw new Error('HTTP ' + resp.status);
+    toast('success', 'Action removed');
+    return true;
+  } catch(err) {
+    toast('error', 'Delete failed: ' + err.message);
+    return false;
+  }
+}
+
 // Encode each path segment individually (don't encode the slashes)
 function encodeDrivePath(path) {
   return path.split('/').map(function(s) { return encodeURIComponent(s); }).join('/');

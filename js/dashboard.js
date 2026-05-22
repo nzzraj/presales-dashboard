@@ -229,7 +229,7 @@ function renderPipelineTable() {
   } else {
     tb.innerHTML = slice.map(function(r) {
       return '<tr>' +
-        '<td><span class="rfp-id">' + X(r.id) + '</span></td>' +
+        '<td><span class="rfp-id rfp-id-link" onclick="openRfpDetail(\'' + X(r.id) + '\')" title="View details &amp; timeline">' + X(r.id) + '</span></td>' +
         '<td class="trunc" title="' + X(r.authority) + '">' + X(r.authority) + '</td>' +
         '<td class="trunc" title="' + X(r.title) + '">' + X(r.title) + '</td>' +
         '<td class="td-muted" style="white-space:nowrap">' + X(r.value) + '</td>' +
@@ -488,10 +488,180 @@ function toast(type, msg) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// RFP DETAIL VIEW + ACTIVITY TIMELINE
+// ═══════════════════════════════════════════════════════════════════
+var currentDetailRfp = null;
+
+var ACTION_ICONS = {
+  'Update':     '&#9998;',
+  'Call':       '&#128222;',
+  'Meeting':    '&#128101;',
+  'Submission': '&#128228;',
+  'Document':   '&#128196;',
+  'Review':     '&#128270;',
+  'Query':      '&#10067;',
+  'Note':       '&#128221;'
+};
+
+var ACTION_COLORS = {
+  'Update':     'var(--blue)',
+  'Call':       'var(--green)',
+  'Meeting':    'var(--accent)',
+  'Submission': 'var(--green)',
+  'Document':   'var(--yellow)',
+  'Review':     'var(--blue)',
+  'Query':      'var(--red)',
+  'Note':       'var(--muted)'
+};
+
+function openRfpDetail(rfpId) {
+  var rec = getData().find(function(r) { return r.id === rfpId; });
+  if (!rec) { toast('error', 'RFP not found'); return; }
+  currentDetailRfp = rec;
+
+  document.getElementById('detailTitle').textContent = rec.id;
+  document.getElementById('detailSubtitle').textContent = rec.title || rec.authority || '';
+
+  // Render summary card
+  var sum = document.getElementById('detailSummary');
+  sum.innerHTML =
+    '<div class="ds-grid">' +
+      dsField('Issuing Authority', rec.authority) +
+      dsField('RFP Title', rec.title) +
+      dsField('Value', rec.value) +
+      dsField('Country', rec.region) +
+      dsField('Industry', rec.industry) +
+      dsField('Division', rec.division) +
+      dsField('Source Type', rec.sourceType) +
+      dsField('Deadline', fmtDate(rec.deadline)) +
+      dsField('Submission Status', rec.submissionStatus, true) +
+      dsField('Opportunity Status', rec.status, true) +
+      dsField('Identification Date', fmtDate(rec.identDate)) +
+      dsField('Assessment Date', fmtDate(rec.assessmentDate)) +
+      (rec.blocking && rec.blocking !== 'None' ? dsField('Blocking', rec.blocking) : '') +
+      (rec.remarks ? '<div class="ds-field full"><div class="ds-label">Remarks</div><div class="ds-value">' + X(rec.remarks) + '</div></div>' : '') +
+    '</div>';
+
+  // Set default datetime to now
+  var now = new Date();
+  var localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  document.getElementById('actionDateInput').value = localISO;
+  document.getElementById('actionDescInput').value = '';
+  document.getElementById('actionTypeSelect').value = 'Update';
+
+  document.getElementById('detailOverlay').classList.add('open');
+  loadTimelineForRfp(rfpId);
+}
+
+function dsField(label, value, isBadge) {
+  if (!value && value !== 0) value = '—';
+  var vHtml = isBadge ? statusBadge(value) : X(value);
+  return '<div class="ds-field"><div class="ds-label">' + X(label) + '</div><div class="ds-value">' + vHtml + '</div></div>';
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('open');
+  currentDetailRfp = null;
+}
+
+async function loadTimelineForRfp(rfpId) {
+  var container = document.getElementById('timelineContainer');
+  container.innerHTML = '<div class="loading-center"><span class="spinner"></span> Loading actions…</div>';
+
+  if (!SP_ACTIONS_ID) {
+    container.innerHTML = '<div class="empty" style="padding:30px">Action tracking not configured yet.<br><span style="font-size:11px;color:var(--muted2)">Create the "RFP Actions" list in SharePoint and add its ID to config.js</span></div>';
+    document.getElementById('timelineCount').textContent = 'Not configured';
+    return;
+  }
+
+  var actions = await loadActions(rfpId);
+  document.getElementById('timelineCount').textContent = actions.length + ' action' + (actions.length !== 1 ? 's' : '');
+  renderTimeline(actions);
+}
+
+function renderTimeline(actions) {
+  var container = document.getElementById('timelineContainer');
+  if (!actions.length) {
+    container.innerHTML = '<div class="empty" style="padding:30px">No actions logged yet — use the form above to start tracking.</div>';
+    return;
+  }
+
+  // Group by date
+  var groups = {};
+  actions.forEach(function(a) {
+    var dateKey = a.actionDate ? a.actionDate.split('T')[0] : 'Unknown';
+    if (!groups[dateKey]) groups[dateKey] = [];
+    groups[dateKey].push(a);
+  });
+
+  var html = '';
+  Object.keys(groups).sort().reverse().forEach(function(dateKey) {
+    html += '<div class="tl-date-group">';
+    html += '<div class="tl-date-label">' + fmtDate(dateKey) + '</div>';
+    groups[dateKey].forEach(function(a) {
+      var time = a.actionDate && a.actionDate.indexOf('T') !== -1
+        ? a.actionDate.split('T')[1].slice(0, 5) : '';
+      var icon = ACTION_ICONS[a.actionType] || '&#128221;';
+      var color = ACTION_COLORS[a.actionType] || 'var(--muted)';
+      html += '<div class="tl-item">' +
+        '<div class="tl-connector"><div class="tl-dot" style="background:' + color + '">' + icon + '</div><div class="tl-line"></div></div>' +
+        '<div class="tl-content">' +
+          '<div class="tl-header">' +
+            '<span class="tl-type-badge" style="color:' + color + ';border-color:' + color + '">' + X(a.actionType) + '</span>' +
+            (time ? '<span class="tl-time">' + time + '</span>' : '') +
+            (a.actionBy ? '<span class="tl-by">' + X(a.actionBy) + '</span>' : '') +
+          '</div>' +
+          '<div class="tl-desc">' + X(a.title) + '</div>' +
+        '</div>' +
+        '<button class="btn btn-ghost btn-icon btn-sm tl-del" title="Remove" onclick="removeAction(\'' + a._spId + '\')">' +
+          '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>' +
+        '</button>' +
+      '</div>';
+    });
+    html += '</div>';
+  });
+
+  container.innerHTML = html;
+}
+
+async function submitActionForm(e) {
+  e.preventDefault();
+  if (!currentDetailRfp) return;
+
+  var btn = document.getElementById('actionSubmitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-width:2px"></span>';
+
+  var actionType = document.getElementById('actionTypeSelect').value;
+  var desc = document.getElementById('actionDescInput').value.trim();
+  var dt = document.getElementById('actionDateInput').value;
+  var isoDate = dt ? new Date(dt).toISOString() : new Date().toISOString();
+
+  var result = await addAction(currentDetailRfp.id, actionType, desc, isoDate);
+  if (result) {
+    document.getElementById('actionDescInput').value = '';
+    // Reset datetime to now
+    var now = new Date();
+    document.getElementById('actionDateInput').value =
+      new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    await loadTimelineForRfp(currentDetailRfp.id);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg> Log';
+}
+
+async function removeAction(actionSpId) {
+  if (!currentDetailRfp) return;
+  var ok = await deleteAction(actionSpId);
+  if (ok) await loadTimelineForRfp(currentDetailRfp.id);
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // KEYBOARD
 // ═══════════════════════════════════════════════════════════════════
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
-    closeRfpModal(); closeDocModal(); closeGapsDetail(); closeConfirm();
+    closeRfpModal(); closeDocModal(); closeGapsDetail(); closeConfirm(); closeDetail();
   }
 });
