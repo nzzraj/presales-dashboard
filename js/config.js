@@ -12,7 +12,7 @@ var SCOPES = ['Sites.ReadWrite.All', 'Files.ReadWrite', 'User.Read'];
 var SP_SITE_ID  = '8d80a518-b3c8-45d3-80e6-d077a3e8e0bd';
 var SP_LIST_ID  = '2951b765-1c2f-48f1-83ce-54d53ca3ebb3';
 var SP_GAPS_ID    = '563a0568-9439-457e-89e1-3979a7d5dea6';
-var SP_ACTIONS_ID = ''; // TODO: paste SharePoint "RFP Actions" list ID here
+var SP_ACTIONS_ID = 'f0eb3dfd-f1e7-4b30-96dc-116423ec976e';
 var SP_HOST       = 'saintsandmastersglobal.sharepoint.com';
 
 var GRAPH = 'https://graph.microsoft.com/v1.0';
