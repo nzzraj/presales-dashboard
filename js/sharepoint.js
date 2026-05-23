@@ -99,8 +99,7 @@ function spToRecord(item) {
     responseDate:     isoDate(f.ResponseReceivedDate),
     remarks:          f.RFPRemarks            || '',
     blocking:         f.BlockingCriteria      || '',
-    blockingDetail:   f.CrieriaDetail         || '',
-    documentPath:     f.DocumentPath          || ''
+    blockingDetail:   f.CrieriaDetail         || ''
   };
 }
 function isoDate(s) { return s ? s.split('T')[0] : ''; }
@@ -128,12 +127,7 @@ function buildFields(form) {
   add('RFPRemarks',              form.elements['Comments'].value.trim());
   add('BlockingCriteria',        form.elements['BlockingCategory'].value);
   add('CrieriaDetail',           form.elements['BlockingDetail'].value.trim());
-  // Auto-generate document path from Country + RFP ID
-  var country = form.elements['CountryOfOrigin'].value.trim();
-  var rfpId = form.elements['RFPId'].value.trim().replace(/\//g, '-');
-  if (country && rfpId) {
-    add('DocumentPath', 'RFP Documents/' + country + '/' + rfpId);
-  }
+  // DocumentPath is computed client-side from Country + RFP ID (not stored in SP)
   return d;
 }
 
