@@ -43,6 +43,12 @@ var ACTION_TYPES = [
   'Note'
 ];
 
+// Country choices
+var COUNTRIES = [
+  'India', 'North Macedonia', 'Slovenia', 'Canada',
+  'United Kingdom', 'Australia', 'Singapore', 'Croatia', 'Czech Republic'
+];
+
 // Division choices
 var DIVISIONS = ['CEE Division', 'India Division', 'SEA Division'];
 

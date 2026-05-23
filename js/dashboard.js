@@ -223,9 +223,9 @@ function renderPipelineTable() {
     var msg = isLive
       ? 'No RFPs found. Use Add RFP to create your first entry.'
       : 'Sign in with your Saints & Masters account to load RFP data';
-    tb.innerHTML = '<tr><td colspan="12" class="empty">' + msg + '</td></tr>';
+    tb.innerHTML = '<tr><td colspan="11" class="empty">' + msg + '</td></tr>';
   } else if (!slice.length) {
-    tb.innerHTML = '<tr><td colspan="12" class="empty">No records match your filters</td></tr>';
+    tb.innerHTML = '<tr><td colspan="11" class="empty">No records match your filters</td></tr>';
   } else {
     tb.innerHTML = slice.map(function(r) {
       return '<tr>' +
@@ -236,7 +236,6 @@ function renderPipelineTable() {
         '<td class="td-muted" style="white-space:nowrap">' + X(r.region) + '</td>' +
         '<td class="td-muted">' + X(r.industry) + '</td>' +
         '<td class="td-muted">' + X(r.division) + '</td>' +
-        '<td class="td-muted">' + X(r.sourceType) + '</td>' +
         '<td class="td-muted" style="white-space:nowrap">' + fmtDate(r.deadline) + '</td>' +
         '<td>' + statusBadge(r.submissionStatus) + '</td>' +
         '<td>' + statusBadge(r.status) + '</td>' +
@@ -535,13 +534,14 @@ function openRfpDetail(rfpId) {
         dsField('Country', rec.region) +
         dsField('Industry', rec.industry) +
       '</div>' +
-      '<div class="ds-row">' +
-        dsField('Division', rec.division) +
-        dsField('Source', rec.sourceType) +
-      '</div>' +
+      dsField('Division', rec.division) +
       '<div class="ds-row">' +
         dsField('Deadline', fmtDate(rec.deadline)) +
         dsField('Identified', fmtDate(rec.identDate)) +
+      '</div>' +
+      '<div class="ds-row">' +
+        dsField('Assessment', fmtDate(rec.assessmentDate)) +
+        dsField('Query Deadline', fmtDate(rec.queryDeadline)) +
       '</div>' +
       (rec.blocking && rec.blocking !== 'None' ? dsField('Blocking', rec.blocking) : '') +
       (rec.remarks ? dsField('Remarks', rec.remarks) : '') +
@@ -567,6 +567,22 @@ function dsField(label, value, isBadge) {
 function closeDetail() {
   document.getElementById('detailOverlay').classList.remove('open');
   currentDetailRfp = null;
+}
+
+function detailEditRfp() {
+  if (!currentDetailRfp) return;
+  var id = currentDetailRfp.id;
+  closeDetail();
+  openEditModal(id);
+}
+
+function detailOpenDocs() {
+  if (!currentDetailRfp) return;
+  var id = currentDetailRfp.id;
+  var title = currentDetailRfp.title;
+  var region = currentDetailRfp.region;
+  closeDetail();
+  openDocModal(id, title, region);
 }
 
 async function loadTimelineForRfp(rfpId) {

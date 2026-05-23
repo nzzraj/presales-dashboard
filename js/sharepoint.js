@@ -117,7 +117,7 @@ function buildFields(form) {
   add('Country',                 form.elements['CountryOfOrigin'].value.trim());
   add('Industry',                form.elements['Industry'].value.trim());
   add('SourcePortal',            form.elements['SourceDivision'].value);
-  add('RFPCategory',             form.elements['SourceType'].value.trim());
+  // RFPCategory (SourceType) removed from form
   add('IdentificatonDate',       form.elements['IdentificationDate'].value || null);
   add('AssessmentDate',          form.elements['AssessmentDate'].value || null);
   add('Status',                  form.elements['SubmissionStatus'].value);
