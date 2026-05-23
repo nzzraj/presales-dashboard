@@ -152,13 +152,15 @@ async function submitRfpForm(e) {
   try {
     if (editingSpId) {
       var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_LIST_ID + '/items/' + editingSpId + '/fields';
+      console.log('[PATCH] fields:', JSON.stringify(fields, null, 2));
       var r = await gPatch(url, fields);
-      if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
+      if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); console.error('[PATCH] error:', JSON.stringify(e2, null, 2)); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
       toast('success', 'RFP updated');
     } else {
       var url = GRAPH + '/sites/' + SP_SITE_ID + '/lists/' + SP_LIST_ID + '/items';
+      console.log('[POST] fields:', JSON.stringify(fields, null, 2));
       var r = await gPost(url, { fields: fields });
-      if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
+      if (!r.ok) { var e2 = await r.json().catch(function(){ return {}; }); console.error('[POST] error:', JSON.stringify(e2, null, 2)); throw new Error(e2.error && e2.error.message || 'HTTP ' + r.status); }
       toast('success', 'RFP added');
     }
     // Upload any attached files to OneDrive
