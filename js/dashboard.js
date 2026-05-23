@@ -520,26 +520,31 @@ function openRfpDetail(rfpId) {
   currentDetailRfp = rec;
 
   document.getElementById('detailTitle').textContent = rec.id;
-  document.getElementById('detailSubtitle').textContent = rec.title || rec.authority || '';
+  document.getElementById('detailSubtitle').textContent = rec.title || '';
+  // Status badges in header
+  document.getElementById('detailBadges').innerHTML =
+    statusBadge(rec.submissionStatus) + ' ' + statusBadge(rec.status);
 
-  // Render summary card
+  // Render compact sidebar summary
   var sum = document.getElementById('detailSummary');
   sum.innerHTML =
     '<div class="ds-grid">' +
-      dsField('Issuing Authority', rec.authority) +
-      dsField('RFP Title', rec.title) +
+      dsField('Authority', rec.authority) +
       dsField('Value', rec.value) +
-      dsField('Country', rec.region) +
-      dsField('Industry', rec.industry) +
-      dsField('Division', rec.division) +
-      dsField('Source Type', rec.sourceType) +
-      dsField('Deadline', fmtDate(rec.deadline)) +
-      dsField('Submission Status', rec.submissionStatus, true) +
-      dsField('Opportunity Status', rec.status, true) +
-      dsField('Identification Date', fmtDate(rec.identDate)) +
-      dsField('Assessment Date', fmtDate(rec.assessmentDate)) +
+      '<div class="ds-row">' +
+        dsField('Country', rec.region) +
+        dsField('Industry', rec.industry) +
+      '</div>' +
+      '<div class="ds-row">' +
+        dsField('Division', rec.division) +
+        dsField('Source', rec.sourceType) +
+      '</div>' +
+      '<div class="ds-row">' +
+        dsField('Deadline', fmtDate(rec.deadline)) +
+        dsField('Identified', fmtDate(rec.identDate)) +
+      '</div>' +
       (rec.blocking && rec.blocking !== 'None' ? dsField('Blocking', rec.blocking) : '') +
-      (rec.remarks ? '<div class="ds-field full"><div class="ds-label">Remarks</div><div class="ds-value">' + X(rec.remarks) + '</div></div>' : '') +
+      (rec.remarks ? dsField('Remarks', rec.remarks) : '') +
     '</div>';
 
   // Set default datetime to now

@@ -359,24 +359,39 @@
 <div class="modal-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
   <div class="modal detail-modal">
     <div class="modal-hdr">
-      <div>
-        <div class="modal-ttl" id="detailTitle">RFP Detail</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:3px" id="detailSubtitle"></div>
+      <div style="flex:1;min-width:0">
+        <div class="detail-hdr-top">
+          <div class="modal-ttl" id="detailTitle">RFP Detail</div>
+          <div class="detail-hdr-badges" id="detailBadges"></div>
+        </div>
+        <div class="detail-hdr-sub" id="detailSubtitle"></div>
       </div>
       <button class="modal-x" onclick="closeDetail()">&#x2715;</button>
     </div>
-    <div class="modal-body" style="padding:0;display:flex;flex-direction:column;overflow-y:auto">
+    <div class="detail-body">
 
-      <!-- RFP Summary Card -->
-      <div class="detail-summary" id="detailSummary"></div>
+      <!-- LEFT: Compact Summary -->
+      <div class="detail-left">
+        <div class="detail-summary" id="detailSummary"></div>
+        <!-- Quick Actions -->
+        <div class="detail-quick-actions">
+          <button class="btn btn-secondary btn-sm" onclick="closeDetail();openEditModal(currentDetailRfp.id)" style="flex:1">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            Edit
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="closeDetail();openDocModal(currentDetailRfp.id,currentDetailRfp.title,currentDetailRfp.region)" style="flex:1">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+            Docs
+          </button>
+        </div>
+      </div>
 
-      <!-- Add Action Form -->
-      <div class="detail-action-form">
-        <div class="action-form-title">Log Action</div>
-        <form id="actionForm" onsubmit="submitActionForm(event)" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
-          <div class="fg" style="flex:0 0 140px">
-            <label class="flabel">Type</label>
-            <select class="finput" name="ActionType" id="actionTypeSelect">
+      <!-- RIGHT: Action Form + Timeline -->
+      <div class="detail-right">
+        <!-- Inline Action Form -->
+        <div class="detail-action-form">
+          <form id="actionForm" onsubmit="submitActionForm(event)" class="action-form-row">
+            <select class="finput action-type-sel" name="ActionType" id="actionTypeSelect">
               <option>Update</option>
               <option>Call</option>
               <option>Meeting</option>
@@ -386,30 +401,24 @@
               <option>Query</option>
               <option>Note</option>
             </select>
-          </div>
-          <div class="fg" style="flex:1;min-width:200px">
-            <label class="flabel">Description</label>
-            <input class="finput" name="ActionDesc" id="actionDescInput" type="text" required placeholder="What did you do?"/>
-          </div>
-          <div class="fg" style="flex:0 0 180px">
-            <label class="flabel">Date &amp; Time</label>
-            <input class="finput" name="ActionDateTime" id="actionDateInput" type="datetime-local"/>
-          </div>
-          <button class="btn btn-primary btn-sm" id="actionSubmitBtn" type="submit" style="height:40px;margin-bottom:1px">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            Log
-          </button>
-        </form>
-      </div>
-
-      <!-- Timeline -->
-      <div class="detail-timeline-wrap">
-        <div class="detail-timeline-header">
-          <span class="action-form-title">Activity Timeline</span>
-          <span class="timeline-count" id="timelineCount">0 actions</span>
+            <input class="finput action-desc-input" name="ActionDesc" id="actionDescInput" type="text" required placeholder="What did you do?"/>
+            <input class="finput action-date-input" name="ActionDateTime" id="actionDateInput" type="datetime-local"/>
+            <button class="btn btn-primary btn-sm action-log-btn" id="actionSubmitBtn" type="submit">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              Log
+            </button>
+          </form>
         </div>
-        <div class="timeline" id="timelineContainer">
-          <div class="loading-center"><span class="spinner"></span> Loading actions…</div>
+
+        <!-- Timeline -->
+        <div class="detail-timeline-wrap">
+          <div class="detail-timeline-header">
+            <span class="action-form-title">Activity Timeline</span>
+            <span class="timeline-count" id="timelineCount">0 actions</span>
+          </div>
+          <div class="timeline" id="timelineContainer">
+            <div class="loading-center"><span class="spinner"></span> Loading actions…</div>
+          </div>
         </div>
       </div>
 
